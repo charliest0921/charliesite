@@ -257,6 +257,33 @@
     </section>
 
     <section class="panel hidden" id="adminPanel">
+      <form id="homeSettingsForm" style="margin-bottom: 22px;">
+        <div class="editor-head">
+          <div>
+            <h2>首頁主視覺文字</h2>
+            <p>這裡控制首頁最上方的小標、主標題和說明文字。</p>
+          </div>
+          <div class="actions">
+            <button class="button" id="resetHomeSettingsButton" type="button">填入預設文字</button>
+            <button class="button primary" type="submit">儲存首頁文字</button>
+          </div>
+        </div>
+        <div class="grid">
+          <label>
+            小標
+            <input name="eyebrow" placeholder="例如 Charlie Class Hub" />
+          </label>
+          <label>
+            主標題
+            <input name="headline" placeholder="例如 今天的班級節奏，從這裡開始。" />
+          </label>
+          <label class="full">
+            說明文字
+            <textarea name="intro" placeholder="輸入首頁上方的說明文字"></textarea>
+          </label>
+        </div>
+      </form>
+
       <div class="editor-head">
         <div>
           <h2>首頁 Widgets</h2>
@@ -375,6 +402,13 @@
     const widgetList = document.getElementById("widgetList");
     const widgetTemplate = document.getElementById("widgetTemplate");
     const statusText = document.getElementById("statusText");
+    const homeSettingsForm = document.getElementById("homeSettingsForm");
+
+    const defaultHomeSettings = {
+      eyebrow: "Charlie Class Hub",
+      headline: "今天的班級節奏，從這裡開始。",
+      intro: "自動整理今日日期、時間、天氣與近期提醒，讓學生一進首頁就知道今天的狀態，也讓班級工具和課程入口保持清楚好找。"
+    };
 
     let db;
     let auth;
@@ -404,6 +438,29 @@
       const snapshot = await getDocs(query(collection(db, "widgets"), orderBy("order", "asc")));
       const widgets = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
       renderWidgets(widgets);
+    }
+
+    function fillHomeSettings(settings) {
+      homeSettingsForm.elements.eyebrow.value = settings.eyebrow || "";
+      homeSettingsForm.elements.headline.value = settings.headline || "";
+      homeSettingsForm.elements.intro.value = settings.intro || "";
+    }
+
+    async function loadHomeSettings() {
+      const settingsDoc = await getDoc(doc(db, "siteSettings", "home"));
+      fillHomeSettings(settingsDoc.exists() ? settingsDoc.data() : defaultHomeSettings);
+    }
+
+    async function saveHomeSettings(event) {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(homeSettingsForm).entries());
+      await setDoc(doc(db, "siteSettings", "home"), {
+        eyebrow: data.eyebrow.trim() || defaultHomeSettings.eyebrow,
+        headline: data.headline.trim() || defaultHomeSettings.headline,
+        intro: data.intro.trim() || defaultHomeSettings.intro,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      setStatus("首頁文字已儲存。");
     }
 
     function renderWidgets(widgets) {
@@ -513,6 +570,10 @@
 
       document.getElementById("seedButton").addEventListener("click", seedDefaults);
       document.getElementById("addButton").addEventListener("click", addWidget);
+      homeSettingsForm.addEventListener("submit", saveHomeSettings);
+      document.getElementById("resetHomeSettingsButton").addEventListener("click", () => {
+        fillHomeSettings(defaultHomeSettings);
+      });
       bootstrapAdminButton.addEventListener("click", async () => {
         const user = auth.currentUser;
         if (!user) return;
@@ -542,6 +603,7 @@
           if (await isAdminUser(user)) {
             bootstrapAdminButton.classList.add("hidden");
             showOnly("admin");
+            await loadHomeSettings();
             await loadWidgets();
           } else {
             accessMessage.innerHTML = `這個帳號尚未被設為管理者。如果 Firebase Data 頁面無法新增文件，請先套用 <code>firestore-bootstrap.rules</code>，再按下方按鈕建立第一位管理者。`;

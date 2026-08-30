@@ -2,11 +2,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/fireba
 import {
   getFirestore,
   collection,
+  doc,
+  getDoc,
   getDocs,
   orderBy,
   query
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { firebaseConfig, hasFirebaseConfig } from "./firebase-config.js";
+
+const defaultHomeSettings = {
+  eyebrow: "Charlie Class Hub",
+  headline: "今天的班級節奏，從這裡開始。",
+  intro: "自動整理今日日期、時間、天氣與近期提醒，讓學生一進首頁就知道今天的狀態，也讓班級工具和課程入口保持清楚好找。"
+};
 
 const defaultWidgets = [
   {
@@ -87,9 +95,106 @@ const formatter = new Intl.DateTimeFormat("zh-Hant-TW", {
   weekday: "long"
 });
 
+const timeFormatter = new Intl.DateTimeFormat("zh-Hant-TW", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false
+});
+
 const today = document.getElementById("today");
 if (today) {
   today.textContent = formatter.format(new Date());
+}
+
+function updateClock() {
+  const now = new Date();
+  const heroDate = document.getElementById("heroDate");
+  const heroTime = document.getElementById("heroTime");
+
+  if (today) today.textContent = formatter.format(now);
+  if (heroDate) heroDate.textContent = formatter.format(now);
+  if (heroTime) heroTime.textContent = timeFormatter.format(now);
+}
+
+const weatherCodes = {
+  0: "晴朗",
+  1: "大致晴朗",
+  2: "局部多雲",
+  3: "陰天",
+  45: "有霧",
+  48: "霧凇",
+  51: "毛毛雨",
+  53: "毛毛雨",
+  55: "較明顯毛毛雨",
+  61: "小雨",
+  63: "降雨",
+  65: "大雨",
+  80: "短暫陣雨",
+  81: "陣雨",
+  82: "強陣雨",
+  95: "雷雨",
+  96: "雷雨可能伴隨冰雹",
+  99: "強雷雨可能伴隨冰雹"
+};
+
+async function loadWeather() {
+  const weatherTemp = document.getElementById("weatherTemp");
+  const weatherDesc = document.getElementById("weatherDesc");
+  const weatherMeta = document.getElementById("weatherMeta");
+
+  if (!weatherTemp || !weatherDesc || !weatherMeta) return;
+
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=24.1813&longitude=120.6387&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia%2FTaipei";
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Weather request failed");
+    const data = await response.json();
+    const current = data.current;
+    const description = weatherCodes[current.weather_code] || "天氣資料已更新";
+
+    weatherTemp.textContent = `${Math.round(current.temperature_2m)}°C`;
+    weatherDesc.textContent = `${description}，濕度 ${current.relative_humidity_2m}%`;
+    weatherMeta.textContent = `台中西屯目前風速 ${Math.round(current.wind_speed_10m)} km/h`;
+  } catch (error) {
+    console.error(error);
+    weatherTemp.textContent = "天氣暫缺";
+    weatherDesc.textContent = "目前無法取得即時天氣";
+    weatherMeta.textContent = "請確認網路連線，稍後重新整理";
+  }
+}
+
+const reminders = [
+  { month: 1, day: 1, name: "元旦", note: "新的一年，適合整理班級目標。" },
+  { month: 2, day: 28, name: "和平紀念日", note: "可安排公民、歷史或生命教育延伸。" },
+  { month: 4, day: 4, name: "兒童節", note: "很適合放一點給學生的驚喜活動。" },
+  { month: 5, day: 1, name: "勞動節", note: "可以聊聊工作、責任與生活。" },
+  { month: 9, day: 28, name: "教師節", note: "也提醒自己保留一點溫柔給教學。" },
+  { month: 10, day: 10, name: "國慶日", note: "近期可留意連假與班級行程調整。" },
+  { month: 12, day: 25, name: "聖誕節", note: "適合安排交換祝福或成果展示。" }
+];
+
+function updateReminder() {
+  const holidayName = document.getElementById("holidayName");
+  const holidayCountdown = document.getElementById("holidayCountdown");
+  const dailyNote = document.getElementById("dailyNote");
+
+  if (!holidayName || !holidayCountdown || !dailyNote) return;
+
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const candidates = reminders
+    .map((item) => {
+      let date = new Date(now.getFullYear(), item.month - 1, item.day);
+      if (date < todayStart) date = new Date(now.getFullYear() + 1, item.month - 1, item.day);
+      return { ...item, date, days: Math.round((date - todayStart) / 86400000) };
+    })
+    .sort((a, b) => a.days - b.days);
+
+  const next = candidates[0];
+  holidayName.textContent = next.name;
+  holidayCountdown.textContent = next.days === 0 ? "就是今天" : `還有 ${next.days} 天`;
+  dailyNote.textContent = next.note;
 }
 
 const toast = document.getElementById("toast");
@@ -152,6 +257,7 @@ async function loadWidgets() {
   try {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    await loadHomeSettings(db);
     const snapshot = await getDocs(query(collection(db, "widgets"), orderBy("order", "asc")));
     const widgets = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
@@ -164,6 +270,23 @@ async function loadWidgets() {
   }
 }
 
+function renderHomeSettings(settings = defaultHomeSettings) {
+  const heroEyebrow = document.getElementById("heroEyebrow");
+  const heroHeadline = document.getElementById("site-title");
+  const heroIntro = document.getElementById("heroIntro");
+
+  if (heroEyebrow) heroEyebrow.textContent = settings.eyebrow || defaultHomeSettings.eyebrow;
+  if (heroHeadline) heroHeadline.textContent = settings.headline || defaultHomeSettings.headline;
+  if (heroIntro) heroIntro.textContent = settings.intro || defaultHomeSettings.intro;
+}
+
+async function loadHomeSettings(db) {
+  const settingsDoc = await getDoc(doc(db, "siteSettings", "home"));
+  if (settingsDoc.exists()) {
+    renderHomeSettings(settingsDoc.data());
+  }
+}
+
 document.querySelectorAll("[data-placeholder='true']").forEach((link) => {
   link.addEventListener("click", (event) => {
     event.preventDefault();
@@ -172,3 +295,8 @@ document.querySelectorAll("[data-placeholder='true']").forEach((link) => {
 });
 
 loadWidgets();
+renderHomeSettings();
+updateClock();
+updateReminder();
+loadWeather();
+setInterval(updateClock, 1000);

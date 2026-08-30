@@ -224,6 +224,97 @@
       min-height: 220px;
     }
 
+    .daily-board {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+      align-self: stretch;
+    }
+
+    .today-card {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      border: 1px solid rgba(232, 238, 255, 0.15);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.035)),
+        rgba(6, 10, 18, 0.58);
+      backdrop-filter: blur(22px) saturate(160%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 18px 38px rgba(0, 0, 0, 0.24);
+    }
+
+    .today-card.primary {
+      min-height: 142px;
+      align-content: end;
+      background:
+        linear-gradient(145deg, rgba(0, 245, 212, 0.2), rgba(255, 46, 136, 0.08)),
+        rgba(6, 10, 18, 0.64);
+    }
+
+    .today-kicker {
+      color: #00f5d4;
+      font-size: 0.82rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      text-shadow: 0 0 18px rgba(0, 245, 212, 0.4);
+    }
+
+    .today-date {
+      margin: 0;
+      color: #ffffff;
+      font-size: clamp(1.55rem, 4vw, 2.65rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .today-time {
+      color: #d8e4fb;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .mini-info {
+      min-height: 132px;
+      padding: 14px;
+      border: 1px solid rgba(232, 238, 255, 0.14);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.03)),
+        rgba(2, 6, 23, 0.42);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 12px 26px rgba(0, 0, 0, 0.18);
+    }
+
+    .mini-info strong {
+      display: block;
+      margin: 0 0 8px;
+      color: #f4f8ff;
+      font-size: 0.92rem;
+    }
+
+    .mini-info b {
+      display: block;
+      margin-bottom: 6px;
+      color: #ffffff;
+      font-size: 1.4rem;
+      line-height: 1.05;
+    }
+
+    .mini-info span,
+    .mini-info p {
+      margin: 0;
+      color: #aab6c9;
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
     .status-tile {
       display: grid;
       grid-template-columns: auto 1fr auto;
@@ -521,6 +612,10 @@
         grid-template-columns: auto 1fr;
       }
 
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
       .status-number {
         grid-column: 2;
       }
@@ -557,42 +652,32 @@
 
     <section class="hero" aria-labelledby="site-title">
       <div class="hero-copy">
-        <div class="eyebrow">新首頁架構</div>
-        <h2 id="site-title">讓班級日常有一個清楚、漂亮、好管理的入口。</h2>
-        <p>這裡會整理自我介紹、班級資料、班經工具、課程應用、互動功能與管理後台。現在先建立首頁骨架，後續可以逐步把每個區塊接上正式內容。</p>
+        <div class="eyebrow" id="heroEyebrow">Charlie Class Hub</div>
+        <h2 id="site-title">今天的班級節奏，從這裡開始。</h2>
+        <p id="heroIntro">自動整理今日日期、時間、天氣與近期提醒，讓學生一進首頁就知道今天的狀態，也讓班級工具和課程入口保持清楚好找。</p>
       </div>
 
-      <div class="hero-panel" aria-label="首頁狀態摘要">
-        <div class="status-tile">
-          <span class="status-icon blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-              <path d="M4 19.5V5a2 2 0 0 1 2-2h11" />
-              <path d="M8 7h11v13H8a4 4 0 0 1 0-8h11" />
-            </svg>
-          </span>
-          <span><strong>首頁區塊</strong><span>六個 widget 已建立</span></span>
-          <span class="status-number">6</span>
+      <div class="daily-board" aria-label="今日資訊中心">
+        <div class="today-card primary">
+          <span class="today-kicker">Today Signal</span>
+          <h3 class="today-date" id="heroDate">讀取今日日期...</h3>
+          <span class="today-time" id="heroTime">--:--:--</span>
         </div>
 
-        <div class="status-tile">
-          <span class="status-icon green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-              <path d="M20 7 10 17l-5-5" />
-            </svg>
-          </span>
-          <span><strong>目前狀態</strong><span>首頁可直接使用與修改</span></span>
-          <span class="status-number">Ready</span>
-        </div>
+        <div class="info-grid">
+          <div class="mini-info cyan">
+            <strong>今日天氣</strong>
+            <b id="weatherTemp">讀取中</b>
+            <span id="weatherDesc">正在取得天氣資料</span>
+            <p id="weatherMeta">預設地點：台中市西屯區</p>
+          </div>
 
-        <div class="status-tile">
-          <span class="status-icon amber">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-              <path d="M12 6v6l4 2" />
-              <circle cx="12" cy="12" r="10" />
-            </svg>
-          </span>
-          <span><strong>後續擴充</strong><span>課表、工具、Firebase 後台</span></span>
-          <span class="status-number">Next</span>
+          <div class="mini-info amber">
+            <strong>近期提醒</strong>
+            <b id="holidayName">計算中</b>
+            <span id="holidayCountdown">正在尋找最近節日</span>
+            <p id="dailyNote">今天也適合把班級節奏調到剛剛好。</p>
+          </div>
         </div>
       </div>
     </section>
@@ -709,6 +794,100 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite">這個區塊尚未啟用，之後可以接上正式頁面。</div>
 
+  <script>
+    (() => {
+      const dateFormatter = new Intl.DateTimeFormat("zh-Hant-TW", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long"
+      });
+      const timeFormatter = new Intl.DateTimeFormat("zh-Hant-TW", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+      const weatherCodes = {
+        0: "晴朗",
+        1: "大致晴朗",
+        2: "局部多雲",
+        3: "陰天",
+        45: "有霧",
+        48: "霧凇",
+        51: "毛毛雨",
+        53: "毛毛雨",
+        55: "較明顯毛毛雨",
+        61: "小雨",
+        63: "降雨",
+        65: "大雨",
+        80: "短暫陣雨",
+        81: "陣雨",
+        82: "強陣雨",
+        95: "雷雨",
+        96: "雷雨可能伴隨冰雹",
+        99: "強雷雨可能伴隨冰雹"
+      };
+      const reminders = [
+        { month: 1, day: 1, name: "元旦", note: "新的一年，適合整理班級目標。" },
+        { month: 2, day: 28, name: "和平紀念日", note: "可安排公民、歷史或生命教育延伸。" },
+        { month: 4, day: 4, name: "兒童節", note: "很適合放一點給學生的驚喜活動。" },
+        { month: 5, day: 1, name: "勞動節", note: "可以聊聊工作、責任與生活。" },
+        { month: 9, day: 28, name: "教師節", note: "也提醒自己保留一點溫柔給教學。" },
+        { month: 10, day: 10, name: "國慶日", note: "近期可留意連假與班級行程調整。" },
+        { month: 12, day: 25, name: "聖誕節", note: "適合安排交換祝福或成果展示。" }
+      ];
+
+      function setText(id, text) {
+        const node = document.getElementById(id);
+        if (node) node.textContent = text;
+      }
+
+      function updateClockFallback() {
+        const now = new Date();
+        setText("today", dateFormatter.format(now));
+        setText("heroDate", dateFormatter.format(now));
+        setText("heroTime", timeFormatter.format(now));
+      }
+
+      function updateReminderFallback() {
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const next = reminders
+          .map((item) => {
+            let date = new Date(now.getFullYear(), item.month - 1, item.day);
+            if (date < todayStart) date = new Date(now.getFullYear() + 1, item.month - 1, item.day);
+            return { ...item, days: Math.round((date - todayStart) / 86400000) };
+          })
+          .sort((a, b) => a.days - b.days)[0];
+        setText("holidayName", next.name);
+        setText("holidayCountdown", next.days === 0 ? "就是今天" : `還有 ${next.days} 天`);
+        setText("dailyNote", next.note);
+      }
+
+      async function loadWeatherFallback() {
+        try {
+          const url = "https://api.open-meteo.com/v1/forecast?latitude=24.1813&longitude=120.6387&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=Asia%2FTaipei";
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("Weather request failed");
+          const data = await response.json();
+          const current = data.current;
+          setText("weatherTemp", `${Math.round(current.temperature_2m)}°C`);
+          setText("weatherDesc", `${weatherCodes[current.weather_code] || "天氣資料已更新"}，濕度 ${current.relative_humidity_2m}%`);
+          setText("weatherMeta", `台中西屯目前風速 ${Math.round(current.wind_speed_10m)} km/h`);
+        } catch (error) {
+          setText("weatherTemp", "天氣暫缺");
+          setText("weatherDesc", "目前無法取得即時天氣");
+          setText("weatherMeta", "地點：台中市西屯區");
+        }
+      }
+
+      updateClockFallback();
+      updateReminderFallback();
+      loadWeatherFallback();
+      setInterval(updateClockFallback, 1000);
+    })();
+  </script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
