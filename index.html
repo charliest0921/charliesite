@@ -1,14 +1,714 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-    <title>我的第一個網站</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Charlie 的班級網站</title>
+  <meta name="description" content="Charlie 的班級網站首頁，集合班級資訊、班經工具、課程應用、互動區與工作後台。" />
+  <style>
+    :root {
+      --bg: #05070d;
+      --ink: #f3f7ff;
+      --muted: #a9b4c7;
+      --panel: rgba(13, 18, 31, 0.58);
+      --panel-solid: #111827;
+      --line: rgba(232, 238, 255, 0.16);
+      --blue: #35a7ff;
+      --cyan: #00f5d4;
+      --green: #b8ff33;
+      --amber: #ffb000;
+      --rose: #ff2e88;
+      --violet: #a855f7;
+      --metal: #c9d3e7;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.54);
+      --radius: 8px;
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      position: relative;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(0, 245, 212, 0.22), transparent 24rem),
+        radial-gradient(circle at 88% 10%, rgba(255, 46, 136, 0.2), transparent 26rem),
+        radial-gradient(circle at 50% 100%, rgba(255, 176, 0, 0.13), transparent 30rem),
+        linear-gradient(135deg, #03040a 0%, #080b12 42%, #10131c 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(115deg, transparent 0 42%, rgba(0, 245, 212, 0.08) 42% 43%, transparent 43% 100%);
+      background-size: 42px 42px, 42px 42px, 100% 100%;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 78%);
+      pointer-events: none;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border: 1px solid rgba(232, 238, 255, 0.2);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.04)),
+        linear-gradient(135deg, #00f5d4, #35a7ff 48%, #ff2e88);
+      color: #03040a;
+      font-weight: 900;
+      box-shadow: 0 0 24px rgba(0, 245, 212, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: #8ea0bb;
+      font-size: 0.95rem;
+    }
+
+    .admin-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid rgba(232, 238, 255, 0.18);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04)),
+        rgba(9, 12, 20, 0.58);
+      color: #f7fbff;
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 12px 30px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(20px) saturate(155%);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 22px;
+      min-height: 300px;
+      margin-bottom: 22px;
+      padding: clamp(24px, 4vw, 42px);
+      border: 1px solid rgba(232, 238, 255, 0.16);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.035)),
+        linear-gradient(125deg, rgba(0, 245, 212, 0.14), rgba(255, 46, 136, 0.1), rgba(255, 176, 0, 0.1)),
+        rgba(7, 10, 18, 0.76);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(26px) saturate(145%);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -70px -90px auto;
+      width: 340px;
+      height: 260px;
+      background:
+        linear-gradient(90deg, rgba(0, 245, 212, 0.18) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 46, 136, 0.16) 1px, transparent 1px);
+      background-size: 28px 28px;
+      transform: rotate(-8deg);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      align-self: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      color: #00f5d4;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-shadow: 0 0 18px rgba(0, 245, 212, 0.45);
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 99px;
+      background: #b8ff33;
+      box-shadow: 0 0 0 5px rgba(184, 255, 51, 0.12), 0 0 18px rgba(184, 255, 51, 0.9);
+    }
+
+    .hero h2 {
+      max-width: 720px;
+      margin: 0;
+      font-size: clamp(2rem, 5.5vw, 4.7rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+      color: #ffffff;
+      text-shadow: 0 0 28px rgba(53, 167, 255, 0.18);
+    }
+
+    .hero p {
+      max-width: 620px;
+      margin: 18px 0 0;
+      color: #bcc7d9;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      line-height: 1.75;
+    }
+
+    .hero-panel {
+      position: relative;
+      z-index: 1;
+      align-self: stretch;
+      display: grid;
+      align-content: center;
+      gap: 12px;
+      min-height: 220px;
+    }
+
+    .status-tile {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid rgba(232, 238, 255, 0.15);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.035)),
+        rgba(6, 10, 18, 0.54);
+      backdrop-filter: blur(18px) saturate(150%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 12px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    .status-icon,
+    .widget-icon {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: var(--radius);
+      color: #02040a;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        inset 0 -10px 18px rgba(0, 0, 0, 0.18),
+        0 0 22px color-mix(in srgb, currentColor 30%, transparent);
+    }
+
+    .status-tile strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 0.98rem;
+    }
+
+    .status-tile span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .status-number {
+      color: #f3f7ff;
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 28px 0 14px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
+      color: #9eabc0;
+      line-height: 1.6;
+    }
+
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .widget {
+      position: relative;
+      overflow: hidden;
+      min-height: 230px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.19), rgba(255, 255, 255, 0.035) 48%, rgba(255, 255, 255, 0.08)),
+        linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)),
+        rgba(8, 11, 19, 0.58);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.26),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+        0 18px 42px rgba(0, 0, 0, 0.34);
+      backdrop-filter: blur(24px) saturate(170%);
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .widget:hover,
+    .widget:focus-visible {
+      transform: translateY(-4px);
+      border-color: currentColor;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.34),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 0 32px color-mix(in srgb, currentColor 28%, transparent),
+        0 26px 58px rgba(0, 0, 0, 0.48);
+      outline: none;
+    }
+
+    .widget::after {
+      content: "";
+      position: absolute;
+      inset: auto 18px 18px auto;
+      width: 82px;
+      height: 82px;
+      border: 1px solid currentColor;
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, currentColor, transparent);
+      opacity: 0.16;
+      transform: rotate(12deg);
+    }
+
+    .widget::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.24), transparent 18%, transparent 70%, rgba(255, 255, 255, 0.08)),
+        radial-gradient(circle at 20% 0%, currentColor, transparent 24rem);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .widget-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .widget-icon svg,
+    .admin-link svg,
+    .arrow svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.2;
+    }
+
+    .tag {
+      padding: 6px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 238, 255, 0.13);
+      background: rgba(255, 255, 255, 0.08);
+      color: #dbe7ff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .widget h3 {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-size: clamp(1.22rem, 2vw, 1.55rem);
+      letter-spacing: 0;
+      color: #ffffff;
+    }
+
+    .widget p {
+      position: relative;
+      z-index: 1;
+      margin: 10px 0 0;
+      color: #aab6c9;
+      line-height: 1.65;
+      font-size: 0.98rem;
+    }
+
+    .widget-footer {
+      position: absolute;
+      z-index: 1;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #edf4ff;
+      font-weight: 800;
+    }
+
+    .arrow {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border-radius: var(--radius);
+      border: 1px solid rgba(232, 238, 255, 0.13);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .blue { color: var(--blue); }
+    .cyan { color: var(--cyan); }
+    .green { color: var(--green); }
+    .amber { color: var(--amber); }
+    .rose { color: var(--rose); }
+    .violet { color: var(--violet); }
+    .blue .widget-icon, .blue.status-icon {
+      background: linear-gradient(145deg, #d8eeff, var(--blue) 46%, #143a91);
+    }
+    .cyan .widget-icon, .cyan.status-icon {
+      background: linear-gradient(145deg, #dcfff8, var(--cyan) 46%, #057c93);
+    }
+    .green .widget-icon, .green.status-icon {
+      background: linear-gradient(145deg, #f3ffd0, var(--green) 46%, #5d7f10);
+    }
+    .amber .widget-icon, .amber.status-icon {
+      background: linear-gradient(145deg, #fff3c4, var(--amber) 48%, #8f3300);
+    }
+    .rose .widget-icon, .rose.status-icon {
+      background: linear-gradient(145deg, #ffe0ef, var(--rose) 48%, #861044);
+    }
+    .violet .widget-icon, .violet.status-icon {
+      background: linear-gradient(145deg, #efe1ff, var(--violet) 48%, #42137f);
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 26px;
+      padding: 16px 0 0;
+      color: #8d9bb3;
+      font-size: 0.92rem;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 20;
+      transform: translate(-50%, 18px);
+      width: min(420px, calc(100% - 32px));
+      padding: 14px 16px;
+      border: 1px solid rgba(0, 245, 212, 0.28);
+      border-radius: var(--radius);
+      background: rgba(5, 7, 13, 0.9);
+      color: white;
+      text-align: center;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 0 34px rgba(0, 245, 212, 0.2);
+      backdrop-filter: blur(18px) saturate(150%);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .widget-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100% - 20px, 1160px);
+        padding-top: 16px;
+      }
+
+      .topbar,
+      .section-head,
+      .footer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .admin-link {
+        width: 100%;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 22px;
+      }
+
+      .status-tile {
+        grid-template-columns: auto 1fr;
+      }
+
+      .status-number {
+        grid-column: 2;
+      }
+
+      .widget-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .widget {
+        min-height: 214px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <main class="page">
+    <header class="topbar" aria-label="網站頂端列">
+      <a class="brand" href="./index.html" aria-label="回到首頁">
+        <span class="brand-mark">C</span>
+        <span>
+          <h1>Charlie 的班級網站</h1>
+          <p>Class Hub / Learning Tools / Admin</p>
+        </span>
+      </a>
 
-<h1>你好！這是我的網站</h1>
+      <a class="admin-link" href="admin.html" data-placeholder="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          <path d="M12 2v20" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+        工作後台
+      </a>
+    </header>
 
-<p>這是我用 GitHub 做的第一個網站。</p>
+    <section class="hero" aria-labelledby="site-title">
+      <div class="hero-copy">
+        <div class="eyebrow">新首頁架構</div>
+        <h2 id="site-title">讓班級日常有一個清楚、漂亮、好管理的入口。</h2>
+        <p>這裡會整理自我介紹、班級資料、班經工具、課程應用、互動功能與管理後台。現在先建立首頁骨架，後續可以逐步把每個區塊接上正式內容。</p>
+      </div>
 
+      <div class="hero-panel" aria-label="首頁狀態摘要">
+        <div class="status-tile">
+          <span class="status-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path d="M4 19.5V5a2 2 0 0 1 2-2h11" />
+              <path d="M8 7h11v13H8a4 4 0 0 1 0-8h11" />
+            </svg>
+          </span>
+          <span><strong>首頁區塊</strong><span>六個 widget 已建立</span></span>
+          <span class="status-number">6</span>
+        </div>
+
+        <div class="status-tile">
+          <span class="status-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path d="M20 7 10 17l-5-5" />
+            </svg>
+          </span>
+          <span><strong>目前狀態</strong><span>首頁可直接使用與修改</span></span>
+          <span class="status-number">Ready</span>
+        </div>
+
+        <div class="status-tile">
+          <span class="status-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path d="M12 6v6l4 2" />
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          </span>
+          <span><strong>後續擴充</strong><span>課表、工具、Firebase 後台</span></span>
+          <span class="status-number">Next</span>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="widgets-title">
+      <div class="section-head">
+        <div>
+          <h2 id="widgets-title">網站入口</h2>
+          <p>先保留六個主要區塊，未來只要替換連結與內容頁即可。</p>
+        </div>
+      </div>
+
+      <div class="widget-grid">
+        <a class="widget blue" href="charlie.html" data-placeholder="true">
+          <div class="widget-top">
+            <span class="widget-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M20 21a8 8 0 0 0-16 0" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            <span class="tag">Profile</span>
+          </div>
+          <h3>Charlie</h3>
+          <p>自我介紹、教學理念、班級經營風格與常用連結。</p>
+          <span class="widget-footer">進入區塊<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></span>
+        </a>
+
+        <a class="widget cyan" href="class-console.html" data-placeholder="true">
+          <div class="widget-top">
+            <span class="widget-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M3 10h18" />
+                <path d="M8 14h.01" />
+                <path d="M12 14h.01" />
+                <path d="M16 14h.01" />
+              </svg>
+            </span>
+            <span class="tag">Class</span>
+          </div>
+          <h3>班級操作台</h3>
+          <p>課表、行事曆、重要公告與班級常用資料的集中入口。</p>
+          <span class="widget-footer">進入區塊<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></span>
+        </a>
+
+        <a class="widget green" href="class-tools.html" data-placeholder="true">
+          <div class="widget-top">
+            <span class="widget-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a6 6 0 0 1-7.9 7.9l-6 6a2.1 2.1 0 0 1-3-3l6-6a6 6 0 0 1 7.9-7.9l-3.1 3.1Z" />
+              </svg>
+            </span>
+            <span class="tag">Tools</span>
+          </div>
+          <h3>班經小工具</h3>
+          <p>時鐘、碼表、計時、分組、抽籤、作業點交等工具入口。</p>
+          <span class="widget-footer">進入區塊<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></span>
+        </a>
+
+        <a class="widget amber" href="course-apps.html" data-placeholder="true">
+          <div class="widget-top">
+            <span class="widget-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+              </svg>
+            </span>
+            <span class="tag">Apps</span>
+          </div>
+          <h3>課程應用程式</h3>
+          <p>依不同主題、單元與課程活動設計的互動應用入口。</p>
+          <span class="widget-footer">進入區塊<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></span>
+        </a>
+
+        <a class="widget rose" href="interactive.html" data-placeholder="true">
+          <div class="widget-top">
+            <span class="widget-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+              </svg>
+            </span>
+            <span class="tag">Community</span>
+          </div>
+          <h3>互動區</h3>
+          <p>未來可放留言板、回饋表單、班級投票與作品交流。</p>
+          <span class="widget-footer">進入區塊<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></span>
+        </a>
+
+        <a class="widget violet" href="admin.html" data-placeholder="true">
+          <div class="widget-top">
+            <span class="widget-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path d="M12 1v22" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </span>
+            <span class="tag">Firebase</span>
+          </div>
+          <h3>工作後台</h3>
+          <p>未來串接 Google Firebase 登入，管理首頁 widget、名稱與連結。</p>
+          <span class="widget-footer">進入區塊<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Charlie Class Hub</span>
+      <span id="today"></span>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">這個區塊尚未啟用，之後可以接上正式頁面。</div>
+
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

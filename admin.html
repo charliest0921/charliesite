@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>工作後台 | Charlie 的班級網站</title>
+  <style>
+    :root {
+      --bg: #05070d;
+      --ink: #f3f7ff;
+      --muted: #a9b4c7;
+      --panel: rgba(13, 18, 31, 0.62);
+      --line: rgba(232, 238, 255, 0.16);
+      --cyan: #00f5d4;
+      --blue: #35a7ff;
+      --green: #b8ff33;
+      --amber: #ffb000;
+      --rose: #ff2e88;
+      --violet: #a855f7;
+      --danger: #fb7185;
+      --radius: 8px;
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 0%, rgba(0, 245, 212, 0.22), transparent 24rem),
+        radial-gradient(circle at 90% 12%, rgba(255, 46, 136, 0.19), transparent 28rem),
+        linear-gradient(135deg, #03040a 0%, #080b12 45%, #11151f 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 82%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .topbar,
+    .panel,
+    .widget-editor {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.04)),
+        var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 24px 70px rgba(0, 0, 0, 0.42);
+      backdrop-filter: blur(24px) saturate(165%);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 5px; font-size: clamp(1.45rem, 3vw, 2.35rem); }
+    h2 { margin-bottom: 12px; font-size: 1.2rem; }
+    p { color: var(--muted); line-height: 1.65; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 13px;
+      border: 1px solid rgba(232, 238, 255, 0.18);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .button.primary {
+      border-color: rgba(0, 245, 212, 0.38);
+      background: linear-gradient(145deg, rgba(0, 245, 212, 0.28), rgba(53, 167, 255, 0.14));
+      box-shadow: 0 0 28px rgba(0, 245, 212, 0.18);
+    }
+
+    .button.danger {
+      border-color: rgba(251, 113, 133, 0.44);
+      color: #ffd8de;
+    }
+
+    .panel {
+      padding: clamp(18px, 3vw, 26px);
+      margin-bottom: 18px;
+    }
+
+    .hidden { display: none !important; }
+
+    .alert {
+      padding: 14px;
+      border: 1px solid rgba(255, 176, 0, 0.34);
+      border-radius: var(--radius);
+      background: rgba(255, 176, 0, 0.09);
+      color: #ffe0a3;
+      line-height: 1.65;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #dce7ff;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid rgba(232, 238, 255, 0.16);
+      border-radius: var(--radius);
+      background: rgba(2, 6, 23, 0.56);
+      color: var(--ink);
+      padding: 10px 11px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 86px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.12);
+    }
+
+    .widget-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .widget-editor {
+      padding: 16px;
+    }
+
+    .editor-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .editor-head strong {
+      font-size: 1.05rem;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .switch-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--cyan);
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .status {
+      min-height: 24px;
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 20px, 1120px); padding-top: 14px; }
+      .topbar, .editor-head { align-items: flex-start; flex-direction: column; }
+      .actions { justify-content: flex-start; width: 100%; }
+      .button { width: 100%; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>工作後台</h1>
+        <p>登入後可以新增、刪除、排序與修改首頁 widget 的名稱、說明、連結與顏色。</p>
+      </div>
+      <div class="actions">
+        <a class="button" href="./index.html">回首頁</a>
+        <button class="button primary" id="loginButton" type="button">Google 登入</button>
+        <button class="button hidden" id="logoutButton" type="button">登出</button>
+      </div>
+    </header>
+
+    <section class="panel" id="setupPanel">
+      <h2>Firebase 尚未設定</h2>
+      <p>請先建立 Firebase 專案，並把 Web App 設定貼到 <code>firebase-config.js</code>。貼好後重新整理這頁，就可以開始登入。</p>
+    </section>
+
+    <section class="panel hidden" id="accessPanel">
+      <h2>管理者權限確認</h2>
+      <p id="userInfo"></p>
+      <div class="alert" id="accessMessage"></div>
+      <div class="actions" style="margin-top: 14px;">
+        <button class="button primary hidden" id="bootstrapAdminButton" type="button">建立我的管理者權限</button>
+      </div>
+    </section>
+
+    <section class="panel hidden" id="adminPanel">
+      <div class="editor-head">
+        <div>
+          <h2>首頁 Widgets</h2>
+          <p>修改後會直接儲存到 Firebase Firestore，首頁重新整理後會讀取最新內容。</p>
+        </div>
+        <div class="actions">
+          <button class="button" id="seedButton" type="button">建立預設六個</button>
+          <button class="button primary" id="addButton" type="button">新增 Widget</button>
+        </div>
+      </div>
+      <p class="status" id="statusText"></p>
+      <div class="widget-list" id="widgetList"></div>
+    </section>
+  </main>
+
+  <template id="widgetTemplate">
+    <form class="widget-editor">
+      <div class="editor-head">
+        <strong data-title>未命名 Widget</strong>
+        <label class="switch-row">
+          <input name="enabled" type="checkbox" />
+          啟用
+        </label>
+      </div>
+      <div class="grid">
+        <label>
+          名稱
+          <input name="title" required />
+        </label>
+        <label>
+          標籤
+          <input name="tag" placeholder="例如 Tools" />
+        </label>
+        <label class="full">
+          說明
+          <textarea name="description"></textarea>
+        </label>
+        <label>
+          連結位址
+          <input name="href" placeholder="例如 class-tools.html 或 https://..." />
+        </label>
+        <label>
+          排序
+          <input name="order" type="number" min="1" step="1" />
+        </label>
+        <label>
+          顏色
+          <select name="color">
+            <option value="blue">電光藍</option>
+            <option value="cyan">霓虹青</option>
+            <option value="green">酸性綠</option>
+            <option value="amber">金屬金</option>
+            <option value="rose">搖滾桃紅</option>
+            <option value="violet">紫色</option>
+          </select>
+        </label>
+        <label>
+          圖示
+          <select name="icon">
+            <option value="profile">個人</option>
+            <option value="calendar">班級</option>
+            <option value="tools">工具</option>
+            <option value="apps">應用</option>
+            <option value="message">互動</option>
+            <option value="admin">後台</option>
+          </select>
+        </label>
+        <div class="actions full">
+          <button class="button primary" type="submit">儲存</button>
+          <button class="button danger" data-delete type="button">刪除</button>
+        </div>
+      </div>
+    </form>
+  </template>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signInWithPopup,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      deleteDoc,
+      doc,
+      getDoc,
+      getDocs,
+      orderBy,
+      query,
+      serverTimestamp,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    import { firebaseConfig, hasFirebaseConfig } from "./firebase-config.js";
+
+    const defaultWidgets = [
+      { id: "charlie", title: "Charlie", description: "自我介紹、教學理念、班級經營風格與常用連結。", href: "charlie.html", color: "blue", tag: "Profile", icon: "profile", enabled: false, order: 1 },
+      { id: "class-console", title: "班級操作台", description: "課表、行事曆、重要公告與班級常用資料的集中入口。", href: "class-console.html", color: "cyan", tag: "Class", icon: "calendar", enabled: false, order: 2 },
+      { id: "class-tools", title: "班經小工具", description: "時鐘、碼表、計時、分組、抽籤、作業點交等工具入口。", href: "class-tools.html", color: "green", tag: "Tools", icon: "tools", enabled: false, order: 3 },
+      { id: "course-apps", title: "課程應用程式", description: "依不同主題、單元與課程活動設計的互動應用入口。", href: "course-apps.html", color: "amber", tag: "Apps", icon: "apps", enabled: false, order: 4 },
+      { id: "interactive", title: "互動區", description: "未來可放留言板、回饋表單、班級投票與作品交流。", href: "interactive.html", color: "rose", tag: "Community", icon: "message", enabled: false, order: 5 },
+      { id: "admin", title: "工作後台", description: "未來串接 Google Firebase 登入，管理首頁 widget、名稱與連結。", href: "admin.html", color: "violet", tag: "Firebase", icon: "admin", enabled: true, order: 6 }
+    ];
+
+    const setupPanel = document.getElementById("setupPanel");
+    const accessPanel = document.getElementById("accessPanel");
+    const adminPanel = document.getElementById("adminPanel");
+    const loginButton = document.getElementById("loginButton");
+    const logoutButton = document.getElementById("logoutButton");
+    const userInfo = document.getElementById("userInfo");
+    const accessMessage = document.getElementById("accessMessage");
+    const bootstrapAdminButton = document.getElementById("bootstrapAdminButton");
+    const widgetList = document.getElementById("widgetList");
+    const widgetTemplate = document.getElementById("widgetTemplate");
+    const statusText = document.getElementById("statusText");
+
+    let db;
+    let auth;
+
+    function setStatus(message) {
+      statusText.textContent = message;
+      if (message) {
+        setTimeout(() => {
+          if (statusText.textContent === message) statusText.textContent = "";
+        }, 2400);
+      }
+    }
+
+    function showOnly(mode) {
+      setupPanel.classList.toggle("hidden", mode !== "setup");
+      accessPanel.classList.toggle("hidden", mode !== "access");
+      adminPanel.classList.toggle("hidden", mode !== "admin");
+      logoutButton.classList.toggle("hidden", mode === "setup");
+    }
+
+    async function isAdminUser(user) {
+      const adminDoc = await getDoc(doc(db, "admins", user.uid));
+      return adminDoc.exists() && adminDoc.data().isAdmin === true;
+    }
+
+    async function loadWidgets() {
+      const snapshot = await getDocs(query(collection(db, "widgets"), orderBy("order", "asc")));
+      const widgets = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+      renderWidgets(widgets);
+    }
+
+    function renderWidgets(widgets) {
+      widgetList.innerHTML = "";
+
+      if (widgets.length === 0) {
+        widgetList.innerHTML = '<div class="alert">目前 Firestore 還沒有 widgets。請按「建立預設六個」。</div>';
+        return;
+      }
+
+      widgets.forEach((widget) => {
+        const node = widgetTemplate.content.firstElementChild.cloneNode(true);
+        node.dataset.id = widget.id;
+        node.querySelector("[data-title]").textContent = widget.title || "未命名 Widget";
+
+        for (const field of ["title", "tag", "description", "href", "order", "color", "icon"]) {
+          node.elements[field].value = widget[field] ?? "";
+        }
+
+        node.elements.enabled.checked = widget.enabled === true;
+
+        node.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const data = Object.fromEntries(new FormData(node).entries());
+          data.enabled = node.elements.enabled.checked;
+          data.order = Number(data.order || 0);
+          data.updatedAt = serverTimestamp();
+          await setDoc(doc(db, "widgets", widget.id), data, { merge: true });
+          setStatus("已儲存。");
+          await loadWidgets();
+        });
+
+        node.querySelector("[data-delete]").addEventListener("click", async () => {
+          const ok = confirm(`確定刪除「${widget.title || "未命名 Widget"}」嗎？`);
+          if (!ok) return;
+          await deleteDoc(doc(db, "widgets", widget.id));
+          setStatus("已刪除。");
+          await loadWidgets();
+        });
+
+        widgetList.append(node);
+      });
+    }
+
+    async function seedDefaults() {
+      await Promise.all(defaultWidgets.map(({ id, ...widget }) => (
+        setDoc(doc(db, "widgets", id), { ...widget, updatedAt: serverTimestamp() }, { merge: true })
+      )));
+      setStatus("預設六個 widgets 已建立。");
+      await loadWidgets();
+    }
+
+    async function addWidget() {
+      const id = `widget-${Date.now()}`;
+      await setDoc(doc(db, "widgets", id), {
+        title: "新的 Widget",
+        description: "請在這裡填寫這個區塊的用途。",
+        href: "",
+        color: "blue",
+        tag: "New",
+        icon: "apps",
+        enabled: false,
+        order: 99,
+        updatedAt: serverTimestamp()
+      });
+      setStatus("已新增 Widget。");
+      await loadWidgets();
+    }
+
+    async function bootstrapCurrentUser(user) {
+      await setDoc(doc(db, "admins", user.uid), {
+        isAdmin: true,
+        email: user.email || "",
+        createdAt: serverTimestamp()
+      });
+      accessMessage.innerHTML = "管理者權限已建立。請把 Firestore Rules 換回正式版 <code>firestore.rules</code>，然後重新整理後台。";
+      bootstrapAdminButton.classList.add("hidden");
+    }
+
+    if (!hasFirebaseConfig()) {
+      showOnly("setup");
+      loginButton.disabled = true;
+    } else {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      showOnly("access");
+
+      loginButton.addEventListener("click", async () => {
+        try {
+          await signInWithPopup(auth, new GoogleAuthProvider());
+        } catch (error) {
+          console.error(error);
+          if (error.code === "auth/unauthorized-domain") {
+            accessMessage.innerHTML = "Firebase 尚未授權這個網址使用 Google 登入。請到 Authentication 的 Authorized domains 加入 <code>127.0.0.1</code> 和 <code>localhost</code>。";
+            showOnly("access");
+            return;
+          }
+          accessMessage.textContent = `登入失敗：${error.message}`;
+          showOnly("access");
+        }
+      });
+
+      logoutButton.addEventListener("click", async () => {
+        await signOut(auth);
+      });
+
+      document.getElementById("seedButton").addEventListener("click", seedDefaults);
+      document.getElementById("addButton").addEventListener("click", addWidget);
+      bootstrapAdminButton.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        try {
+          await bootstrapCurrentUser(user);
+        } catch (error) {
+          console.error(error);
+          accessMessage.innerHTML = "建立失敗。請確認你目前套用的是第一次設定用的 <code>firestore-bootstrap.rules</code>。";
+        }
+      });
+
+      onAuthStateChanged(auth, async (user) => {
+        loginButton.classList.toggle("hidden", Boolean(user));
+        logoutButton.classList.toggle("hidden", !user);
+
+        if (!user) {
+          userInfo.textContent = "";
+          accessMessage.textContent = "請用管理者 Google 帳號登入。";
+          bootstrapAdminButton.classList.add("hidden");
+          showOnly("access");
+          return;
+        }
+
+        userInfo.innerHTML = `目前登入：<code>${user.email}</code><br>UID：<code>${user.uid}</code>`;
+
+        try {
+          if (await isAdminUser(user)) {
+            bootstrapAdminButton.classList.add("hidden");
+            showOnly("admin");
+            await loadWidgets();
+          } else {
+            accessMessage.innerHTML = `這個帳號尚未被設為管理者。如果 Firebase Data 頁面無法新增文件，請先套用 <code>firestore-bootstrap.rules</code>，再按下方按鈕建立第一位管理者。`;
+            bootstrapAdminButton.classList.remove("hidden");
+            showOnly("access");
+          }
+        } catch (error) {
+          console.error(error);
+          accessMessage.textContent = "權限檢查失敗，請確認 Firestore 已建立並套用安全規則。";
+          showOnly("access");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
