@@ -13,7 +13,7 @@ import { firebaseConfig, hasFirebaseConfig } from "./firebase-config.js";
 const defaultHomeSettings = {
   eyebrow: "Charlie Class Hub",
   headline: "今天的班級節奏，從這裡開始。",
-  intro: "自動整理今日日期、時間、天氣與近期提醒，讓學生一進首頁就知道今天的狀態，也讓班級工具和課程入口保持清楚好找。"
+  intro: "自動整理今日日期、時間、天氣與近期提醒，讓師生一進首頁就知道今天的狀態，也讓班級工具和課程入口保持清楚好找。"
 };
 
 const defaultWidgets = [
@@ -102,6 +102,11 @@ const timeFormatter = new Intl.DateTimeFormat("zh-Hant-TW", {
   hour12: false
 });
 
+const lunarFormatter = new Intl.DateTimeFormat("zh-Hant-TW-u-ca-chinese", {
+  month: "long",
+  day: "numeric"
+});
+
 const today = document.getElementById("today");
 if (today) {
   today.textContent = formatter.format(new Date());
@@ -110,10 +115,12 @@ if (today) {
 function updateClock() {
   const now = new Date();
   const heroDate = document.getElementById("heroDate");
+  const lunarDate = document.getElementById("lunarDate");
   const heroTime = document.getElementById("heroTime");
 
   if (today) today.textContent = formatter.format(now);
   if (heroDate) heroDate.textContent = formatter.format(now);
+  if (lunarDate) lunarDate.textContent = `農曆 ${lunarFormatter.format(now)}`;
   if (heroTime) heroTime.textContent = timeFormatter.format(now);
 }
 
@@ -165,13 +172,57 @@ async function loadWeather() {
 }
 
 const reminders = [
-  { month: 1, day: 1, name: "元旦", note: "新的一年，適合整理班級目標。" },
-  { month: 2, day: 28, name: "和平紀念日", note: "可安排公民、歷史或生命教育延伸。" },
-  { month: 4, day: 4, name: "兒童節", note: "很適合放一點給學生的驚喜活動。" },
-  { month: 5, day: 1, name: "勞動節", note: "可以聊聊工作、責任與生活。" },
-  { month: 9, day: 28, name: "教師節", note: "也提醒自己保留一點溫柔給教學。" },
-  { month: 10, day: 10, name: "國慶日", note: "近期可留意連假與班級行程調整。" },
-  { month: 12, day: 25, name: "聖誕節", note: "適合安排交換祝福或成果展示。" }
+  { month: 1, day: 1, name: "元旦", note: "新的一年開始，大家可以一起整理目標與期待。" },
+  { month: 1, day: 20, name: "大寒", note: "節氣進入寒冷時段，進教室前記得照顧身體與保暖。" },
+  { month: 2, day: 3, name: "立春", note: "春天開始，班級可以一起啟動新的任務與節奏。" },
+  { month: 2, day: 14, name: "西洋情人節", note: "今天適合練習感謝、友善表達與尊重彼此。" },
+  { month: 2, day: 19, name: "雨水", note: "天氣漸濕，大家記得雨具、外套和走廊安全。" },
+  { month: 2, day: 28, name: "和平紀念日", note: "今天適合一起思考和平、理解與尊重差異。" },
+  { month: 3, day: 5, name: "驚蟄", note: "萬物甦醒，也提醒大家把學習狀態慢慢喚醒。" },
+  { month: 3, day: 8, name: "婦女節", note: "今天可以一起看見不同角色的努力與貢獻。" },
+  { month: 3, day: 12, name: "植樹節", note: "適合一起關心校園環境，從一個小行動開始。" },
+  { month: 3, day: 20, name: "春分", note: "晝夜均分，大家也可以練習平衡學習與休息。" },
+  { month: 4, day: 4, name: "兒童節 / 清明", note: "連假前後記得整理作業、活動安排與生活節奏。" },
+  { month: 4, day: 20, name: "穀雨", note: "春雨滋養，今天適合閱讀、寫作或觀察身邊的自然。" },
+  { month: 4, day: 22, name: "世界地球日", note: "大家可以一起完成一件減塑、節能或愛護校園的小事。" },
+  { month: 5, day: 1, name: "勞動節", note: "今天適合一起理解工作、責任與生活的價值。" },
+  { month: 5, day: 5, name: "立夏", note: "天氣轉熱，大家記得補水、防曬與保持教室通風。" },
+  { month: 5, day: 15, name: "國際家庭日", note: "可以把感謝帶回家，也把家人的支持放在心裡。" },
+  { month: 5, day: 21, name: "小滿", note: "事情漸漸成形，大家持續累積，不需要急著一次完成。" },
+  { month: 6, day: 5, name: "芒種", note: "期末前事情會變多，大家一起整理進度與補交清單。" },
+  { month: 6, day: 21, name: "夏至", note: "白天最長，戶外活動時記得補水、防曬與留意身體狀態。" },
+  { month: 7, day: 7, name: "小暑", note: "暑氣開始，大家一起把暑假前的安全事項確認好。" },
+  { month: 7, day: 23, name: "大暑", note: "炎熱高峰，記得防中暑，也讓作息保持規律。" },
+  { month: 8, day: 7, name: "立秋", note: "新學期將近，可以一起整理環境、用品與心情。" },
+  { month: 8, day: 23, name: "處暑", note: "暑氣漸退，大家慢慢把生活節奏調回穩定狀態。" },
+  { month: 9, day: 3, name: "軍人節", note: "今天適合一起討論服務、守護與責任。" },
+  { month: 9, day: 7, name: "白露", note: "早晚溫差變明顯，大家記得外套與身體照顧。" },
+  { month: 9, day: 21, name: "國家防災日", note: "大家一起熟悉避難動線，安全感來自平常的練習。" },
+  { month: 9, day: 23, name: "秋分", note: "學期進入穩定期，可以一起檢查學習習慣與目標。" },
+  { month: 9, day: 28, name: "教師節", note: "今天適合把感謝說出來，也一起珍惜教室裡的陪伴。" },
+  { month: 10, day: 6, name: "中秋節前後", note: "可以一起觀察月亮、分享節慶故事，也記得連假安排。" },
+  { month: 10, day: 8, name: "寒露", note: "天氣轉涼，大家留意早晚溫差與衣物準備。" },
+  { month: 10, day: 10, name: "國慶日", note: "近期留意連假、活動與班級行程調整。" },
+  { month: 10, day: 24, name: "霜降", note: "秋意更深，適合一起收束任務與整理作品。" },
+  { month: 10, day: 25, name: "臺灣光復節", note: "可以依課程進度一起認識歷史與在地故事。" },
+  { month: 10, day: 31, name: "萬聖節", note: "今天適合用英語、閱讀或創意活動讓教室更有趣。" },
+  { month: 11, day: 7, name: "立冬", note: "冬季開始，大家一起留意保暖、健康與作息。" },
+  { month: 11, day: 12, name: "國父誕辰紀念日", note: "可以搭配課程一起討論人物、時代與公共生活。" },
+  { month: 11, day: 22, name: "小雪", note: "天氣逐漸轉冷，運動後記得擦汗與保暖。" },
+  { month: 12, day: 7, name: "大雪", note: "期末前適合一起檢查作品、作業與學習檔案。" },
+  { month: 12, day: 21, name: "冬至", note: "今天可以一起認識節氣與家庭文化，讓學期慢慢收束。" },
+  { month: 12, day: 25, name: "聖誕節", note: "適合交換祝福、整理成果，也把善意留在教室裡。" },
+  { month: 12, day: 31, name: "跨年", note: "適合一起回顧這一年的成長、作品與值得感謝的人。" }
+];
+
+const weekdayNotes = [
+  "星期日：適合慢慢收心，準備明天的課本、水壺和心情。",
+  "星期一：本週啟動，大家先確認目標、課表與重要任務。",
+  "星期二：適合穩定推進，把昨天未完成的小事補齊。",
+  "星期三：一週中點，大家可以做一次小檢核，確認自己走到哪裡。",
+  "星期四：適合收束作品與作業，提早處理零碎待辦。",
+  "星期五：整理日，大家帶著清楚的任務和輕一點的心情回家。",
+  "星期六：休息也算進度，留一點時間閱讀、運動和充電。"
 ];
 
 function updateReminder() {
@@ -194,7 +245,7 @@ function updateReminder() {
   const next = candidates[0];
   holidayName.textContent = next.name;
   holidayCountdown.textContent = next.days === 0 ? "就是今天" : `還有 ${next.days} 天`;
-  dailyNote.textContent = next.note;
+  dailyNote.textContent = `${weekdayNotes[now.getDay()]} ${next.note}`;
 }
 
 const toast = document.getElementById("toast");
