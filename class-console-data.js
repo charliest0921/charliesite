@@ -25,8 +25,8 @@
   });
 
   const links = [
-    { title: "康軒", url: "https://945cloud.knsh.com.tw/?from=o", category: "教科書", note: "康軒雲資源入口" },
-    { title: "南一", url: "https://nanidigi.nani.com.tw/", category: "教科書", note: "南一數位資源入口網" },
+    { title: "康軒數學", url: "https://digitalmaster.knsh.com.tw/v3/pages/e/index.html#year=1151&field=ma&grade=6%E5%B9%B4%E7%B4%9A&item=ebook&bookcase=online", category: "教科書", note: "康軒數學六上" },
+    { title: "南一", url: "https://reader.nani.com.tw/bookstore", category: "教科書", note: "南一數位資源入口網" },
     { title: "翰林電子書網站", url: "https://hanlindigi.hle.com.tw/depot/1/default", category: "教科書", note: "翰林數位產品入口" },
     { title: "教育部簡編本字典", url: "https://dict.concised.moe.edu.tw/", category: "語文", note: "國語辭典簡編本" },
     { title: "上石首頁", url: "https://hses.tc.edu.tw/", category: "上石", note: "臺中市西屯區上石國小" },
