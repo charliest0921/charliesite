@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>作業點交系統 | 班經小工具</title>
+  <style>
+    :root{--ink:#f3f7ff;--muted:#a9b4c7;--line:rgba(232,238,255,.16);--cyan:#00f5d4;--green:#22c55e;--yellow:#facc15;--red:#ef4444;--radius:8px;font-family:"Segoe UI","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif}
+    *{box-sizing:border-box}html,body{height:100%;overflow:hidden}body{height:100dvh;margin:0;color:var(--ink);background:radial-gradient(circle at 12% 0%,rgba(0,245,212,.18),transparent 24rem),radial-gradient(circle at 90% 10%,rgba(255,46,136,.18),transparent 28rem),linear-gradient(135deg,#03040a,#080b12 45%,#11151f)}
+    body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(0deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 82%)}
+    a{color:inherit;text-decoration:none}button,input{font:inherit}.page{width:min(1280px,calc(100% - 16px));height:100dvh;margin:0 auto;padding:8px 0;display:grid;grid-template-rows:auto auto 1fr auto;gap:7px}.glass{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.035)),rgba(8,11,19,.66);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 24px 70px rgba(0,0,0,.42);backdrop-filter:blur(24px) saturate(165%)}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px}.topbar h1{margin:0;font-size:1.15rem}.topbar p{margin:2px 0 0;color:var(--muted);font-size:.85rem}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.btn,.seg{min-height:31px;padding:0 9px;border:1px solid rgba(232,238,255,.18);border-radius:var(--radius);background:rgba(255,255,255,.08);color:var(--ink);font-weight:850;cursor:pointer}.btn.primary,.seg.active{border-color:rgba(0,245,212,.42);background:linear-gradient(145deg,rgba(0,245,212,.28),rgba(53,167,255,.14));box-shadow:0 0 22px rgba(0,245,212,.15)}
+    .panel{min-height:0;padding:8px}.setup{display:grid;grid-template-columns:1.2fr 88px 1fr auto;gap:7px;align-items:end}.field{display:grid;gap:3px;color:#dce7ff;font-size:.78rem;font-weight:850}input{width:100%;padding:7px 8px;border:1px solid rgba(232,238,255,.16);border-radius:var(--radius);background:rgba(2,6,23,.56);color:var(--ink)}.segments{display:flex;gap:6px;flex-wrap:wrap}.task-names{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}.boards{min-height:0;display:grid;gap:7px}.boards.c1{grid-template-columns:1fr}.boards.c2{grid-template-columns:repeat(2,1fr)}.boards.c3{grid-template-columns:repeat(3,1fr)}.task-card{min-height:0;display:grid;grid-template-rows:auto auto 1fr;border:1px solid rgba(232,238,255,.16);border-radius:var(--radius);background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.035)),rgba(8,11,19,.62);overflow:hidden}.task-head{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:7px 8px;border-bottom:1px solid rgba(232,238,255,.12)}.task-head strong{font-size:1rem}.mini-counts{display:flex;gap:5px;color:#c8d5eb;font-size:.78rem;font-weight:850;white-space:nowrap}.quick{display:flex;gap:5px;flex-wrap:wrap;padding:6px 8px}.quick .btn{min-height:26px;padding:0 7px;font-size:.78rem}.student-grid{min-height:0;padding:7px;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:1fr;gap:5px}.student{min-height:0;border:1px solid rgba(255,255,255,.22);border-radius:var(--radius);color:white;font-size:clamp(1rem,3.2vw,1.85rem);font-weight:950;line-height:1;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 12px 24px rgba(0,0,0,.25)}.s0{background:linear-gradient(145deg,#ff8a8a,var(--red) 56%,#7f1d1d)}.s1{background:linear-gradient(145deg,#fff2a8,var(--yellow) 56%,#854d0e);color:#181006}.s2{background:linear-gradient(145deg,#bbf7d0,var(--green) 56%,#14532d);color:#03150a}.actions{display:flex;gap:7px;flex-wrap:wrap}.output{max-height:8vh;overflow:auto;white-space:pre-wrap;color:#c8d5eb;line-height:1.35;margin:5px 0 0;font-size:.84rem}
+    @media(max-width:900px){.page{width:calc(100% - 12px);gap:6px}.topbar p{display:none}.setup{grid-template-columns:1fr 78px 1fr auto}.boards.c3{grid-template-columns:1fr;grid-template-rows:repeat(3,1fr)}.boards.c2{grid-template-columns:1fr;grid-template-rows:repeat(2,1fr)}.task-card{grid-template-rows:auto auto 1fr}.student-grid{grid-template-columns:repeat(9,1fr);gap:4px}.student{font-size:clamp(.92rem,2.6vw,1.35rem)}.quick{display:none}.task-head{padding:5px 7px}.task-names{grid-template-columns:repeat(3,1fr)}.nav a,.btn,.seg{min-height:29px;padding:0 7px;font-size:.86rem}.output{display:none}}@media(max-width:620px){.setup,.task-names{grid-template-columns:1fr}.setup .segments{grid-column:1/-1}.student-grid{grid-template-columns:repeat(6,1fr)}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="topbar glass"><div><h1>作業點交</h1><p>選 1、2、3 種作業時，畫面會直接出現對應數量的完整座號組。</p></div><nav class="nav"><a href="./class-tools.html">工具入口</a><a href="./index.html">首頁</a></nav></header>
+  <section class="panel glass">
+    <div class="setup">
+      <label class="field">點交標題<input id="title" value="今日作業點交"></label>
+      <label class="field">座號到<input id="maxNo" type="number" min="1" max="30" value="30"></label>
+      <label class="field">排除座號<input id="exclude" placeholder="例如 11, 28"></label>
+      <div class="segments"><button class="seg active" data-count="1">1 種</button><button class="seg" data-count="2">2 種</button><button class="seg" data-count="3">3 種</button></div>
+    </div>
+    <div class="task-names"><input id="task0" value="作業一"><input id="task1" value="作業二"><input id="task2" value="作業三"></div>
+  </section>
+  <section class="boards c1" id="boards"></section>
+  <section class="panel glass">
+    <div class="actions"><button class="btn primary" id="build">套用座號</button><button class="btn" id="makeReport">產生紀錄</button><button class="btn" id="makeReminder">產生提醒</button><button class="btn" id="copyOutput">複製</button></div>
+    <pre class="output" id="output"></pre>
+  </section>
+</main>
+<script>
+  let students=[],taskCount=1;
+  const $=id=>document.getElementById(id), labels=["未完成","處理中","已完成"], taskNames=()=>[$("task0").value||"作業一",$("task1").value||"作業二",$("task2").value||"作業三"];
+  function excluded(){return new Set($("exclude").value.split(/,|，|\s+/).map(Number).filter(Boolean))}
+  function setup(){const ex=excluded();students=Array.from({length:Number($("maxNo").value)||30},(_,i)=>i+1).filter(n=>!ex.has(n)).map(no=>({no,states:[0,0,0]}));render()}
+  function counts(task){return [0,1,2].map(st=>students.filter(s=>s.states[task]===st).length)}
+  function nums(task,st){return students.filter(s=>s.states[task]===st).map(s=>`${s.no}號`)}
+  function render(){const names=taskNames();$("boards").className=`boards c${taskCount}`;$("boards").innerHTML=Array.from({length:taskCount},(_,task)=>{const c=counts(task);return `<article class="task-card"><div class="task-head"><strong>${names[task]}</strong><span class="mini-counts"><span>紅 ${c[0]}</span><span>黃 ${c[1]}</span><span>綠 ${c[2]}</span></span></div><div class="quick"><button class="btn" data-all="${task}-0">全紅</button><button class="btn" data-all="${task}-1">全黃</button><button class="btn" data-all="${task}-2">全綠</button></div><div class="student-grid">${students.map(s=>`<button class="student s${s.states[task]}" data-seat="${s.no}" data-task="${task}">${s.no}</button>`).join("")}</div></article>`}).join("");document.querySelectorAll("[data-seat]").forEach(b=>b.onclick=()=>{const s=students.find(x=>x.no==b.dataset.seat),task=Number(b.dataset.task);s.states[task]=(s.states[task]+1)%3;render()});document.querySelectorAll("[data-all]").forEach(b=>b.onclick=()=>{const [task,state]=b.dataset.all.split("-").map(Number);students.forEach(s=>s.states[task]=state);render()})}
+  document.querySelectorAll("[data-count]").forEach(b=>b.onclick=()=>{taskCount=Number(b.dataset.count);document.querySelectorAll("[data-count]").forEach(x=>x.classList.toggle("active",x===b));render()});
+  $("build").onclick=setup;["task0","task1","task2"].forEach(id=>$(id).addEventListener("input",render));
+  $("makeReport").onclick=()=>{const names=taskNames();$("output").textContent=`${$("title").value}\n${new Date().toLocaleString("zh-Hant-TW",{hour12:false})}\n\n`+Array.from({length:taskCount},(_,i)=>`${names[i]}\n${labels[0]}：${nums(i,0).join("、")||"無"}\n${labels[1]}：${nums(i,1).join("、")||"無"}\n${labels[2]}：${nums(i,2).join("、")||"無"}`).join("\n\n")};
+  $("makeReminder").onclick=()=>{const names=taskNames();$("output").textContent=Array.from({length:taskCount},(_,i)=>`${names[i]}需確認：${[...nums(i,0),...nums(i,1)].join("、")||"全班完成"}`).join("\n")};
+  $("copyOutput").onclick=()=>navigator.clipboard?.writeText($("output").textContent||"");setup();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>抽籤系統 | 班經小工具</title>
+  <style>
+    :root{--ink:#f3f7ff;--muted:#a9b4c7;--line:rgba(232,238,255,.16);--cyan:#00f5d4;--blue:#35a7ff;--amber:#ffb000;--rose:#ff2e88;--radius:8px;font-family:"Segoe UI","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif}
+    *{box-sizing:border-box}html,body{height:100%;overflow:hidden}body{height:100dvh;margin:0;color:var(--ink);background:radial-gradient(circle at 12% 0%,rgba(0,245,212,.18),transparent 24rem),radial-gradient(circle at 90% 10%,rgba(255,46,136,.18),transparent 28rem),linear-gradient(135deg,#03040a,#080b12 45%,#11151f)}
+    body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(0deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 82%)}
+    a{color:inherit;text-decoration:none}button,input{font:inherit}.page{width:min(1180px,calc(100% - 20px));height:100dvh;margin:0 auto;padding:10px 0;display:grid;grid-template-rows:auto 1fr;gap:10px}.glass{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.035)),rgba(8,11,19,.66);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 24px 70px rgba(0,0,0,.42);backdrop-filter:blur(24px) saturate(165%)}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px}.topbar h1{margin:0;font-size:1.2rem}.topbar p{margin:2px 0 0;color:var(--muted);font-size:.9rem}.nav{display:flex;gap:8px}.nav a,.btn{min-height:38px;padding:0 12px;border:1px solid rgba(232,238,255,.18);border-radius:var(--radius);background:rgba(255,255,255,.08);color:var(--ink);font-weight:850;cursor:pointer}.btn.primary{border-color:rgba(0,245,212,.42);background:linear-gradient(145deg,rgba(0,245,212,.28),rgba(53,167,255,.14));box-shadow:0 0 22px rgba(0,245,212,.15)}.btn.warn{border-color:rgba(255,176,0,.42);color:#ffe6a6}
+    .layout{min-height:0;display:grid;grid-template-columns:340px 1fr;gap:10px}.panel{min-height:0;padding:12px}.settings{display:grid;grid-template-rows:auto auto auto auto auto 1fr auto;gap:9px}.field{display:grid;gap:5px;color:#dce7ff;font-weight:850;font-size:.9rem}input{width:100%;padding:9px 10px;border:1px solid rgba(232,238,255,.16);border-radius:var(--radius);background:rgba(2,6,23,.56);color:var(--ink)}.check{display:grid;gap:5px;padding:9px;border:1px solid rgba(232,238,255,.14);border-radius:var(--radius);background:rgba(255,255,255,.055);color:#dce7ff}.check label{display:flex;align-items:center;gap:8px;font-weight:950}.check input{width:auto}.hint{margin:0;color:var(--muted);font-size:.82rem;line-height:1.35}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pool{min-height:0;overflow:auto;padding:10px;border:1px dashed rgba(232,238,255,.18);border-radius:var(--radius);color:#aab6c9;line-height:1.55;font-size:.9rem}.pool b{color:#9ffff0}
+    .result{display:grid;grid-template-rows:auto 1fr auto;gap:10px;text-align:center}.label{color:var(--cyan);font-weight:950}.result-grid{align-self:center;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;max-height:100%;overflow:auto}.result-card{display:grid;place-items:center;min-height:min(28vh,210px);padding:12px;border:1px solid rgba(0,245,212,.24);border-radius:var(--radius);background:linear-gradient(145deg,rgba(0,245,212,.18),rgba(53,167,255,.08));font-size:clamp(3rem,8vw,6.8rem);font-weight:950;line-height:.95;text-shadow:0 0 38px rgba(53,167,255,.38)}.result-card small{font-size:.28em;margin-left:.08em}.empty{color:#8fa1bd;font-size:clamp(2rem,7vw,5rem)}.status{min-height:46px;display:grid;place-items:center;padding:8px 10px;border:1px solid rgba(232,238,255,.14);border-radius:var(--radius);background:rgba(255,255,255,.06);color:#c8d5eb;font-weight:850}
+    @media(max-width:900px){.page{width:calc(100% - 16px);padding:8px 0}.layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}.topbar p{display:none}.settings{grid-template-columns:repeat(2,1fr);grid-template-rows:auto}.pool{display:none}.actions,.check{grid-column:1/-1}.result-card{min-height:120px}.result-grid{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}.nav a,.btn{min-height:34px;padding:0 8px}}@media(max-width:560px){.settings{grid-template-columns:1fr}.nav a,.btn{width:100%;text-align:center}.result-card{font-size:clamp(2.5rem,16vw,4.8rem)}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="topbar glass"><div><h1>抽籤系統</h1><p>一般抽籤、排除座號、連續不重複，結果一律放大顯示。</p></div><nav class="nav"><a href="./class-tools.html">工具入口</a><a href="./index.html">首頁</a></nav></header>
+  <section class="layout">
+    <aside class="panel glass settings">
+      <label class="field">從 1 到幾號<input id="maxNo" type="number" min="1" max="99" value="30"></label>
+      <label class="field">一次抽出幾個<input id="drawCount" type="number" min="1" max="30" value="1"></label>
+      <label class="field">排除座號<input id="exclude" placeholder="例如 3, 11, 28"></label>
+      <div class="check">
+        <label><input id="noRepeat" type="checkbox" checked> 連續不重複</label>
+        <p class="hint">開啟後，抽過的座號會先離開抽籤池；一直抽到極限時，本輪每個人都會被抽到一次。</p>
+      </div>
+      <div class="actions"><button class="btn primary" id="draw">開始抽籤</button><button class="btn warn" id="resetPool">重置抽籤池</button></div>
+      <div class="pool" id="pool"></div>
+      <div class="actions"><button class="btn" id="clear">清除結果</button><button class="btn" id="copyResult">複製結果</button></div>
+    </aside>
+    <section class="panel glass result">
+      <div class="label">抽籤結果</div>
+      <div class="result-grid" id="resultGrid"><div class="result-card empty">READY</div></div>
+      <div class="status" id="status">抽籤池已準備好。</div>
+    </section>
+  </section>
+</main>
+<script>
+  const key="charlie-lottery-settings-v2";
+  let drawn=[],lastResults=[];
+  const $=id=>document.getElementById(id);
+  function parseNums(text){return new Set(text.split(/,|，|\s+/).map(Number).filter(Boolean))}
+  function allCandidates(){const ex=parseNums($("exclude").value);return Array.from({length:Number($("maxNo").value)||30},(_,i)=>i+1).filter(n=>!ex.has(n))}
+  function activeCandidates(){const all=allCandidates();return $("noRepeat").checked?all.filter(n=>!drawn.includes(n)):all}
+  function save(){localStorage.setItem(key,JSON.stringify({maxNo:$("maxNo").value,drawCount:$("drawCount").value,exclude:$("exclude").value,noRepeat:$("noRepeat").checked,drawn}))}
+  function load(){try{const s=JSON.parse(localStorage.getItem(key)||"{}");$("maxNo").value=s.maxNo||30;$("drawCount").value=s.drawCount||1;$("exclude").value=s.exclude||"";$("noRepeat").checked=s.noRepeat!==false;drawn=Array.isArray(s.drawn)?s.drawn:[]}catch{}}
+  function trimDrawn(){const all=new Set(allCandidates());drawn=drawn.filter(n=>all.has(n))}
+  function renderPool(message){trimDrawn();const all=allCandidates(),available=activeCandidates();$("pool").innerHTML=`<b>可抽 ${available.length} 人</b> / 符合條件 ${all.length} 人<br>已抽過：${drawn.map(n=>n+"號").join("、")||"無"}<br>目前可抽：${available.map(n=>n+"號").join("、")||"無"}`;$("status").textContent=message||`抽籤池剩餘 ${available.length} 人。`;save()}
+  function renderResults(results){lastResults=results;$("resultGrid").innerHTML=results.length?results.map(n=>`<div class="result-card">${n}<small>號</small></div>`).join(""):`<div class="result-card empty">無結果</div>`}
+  function pick(){const available=activeCandidates();const need=Math.max(1,Number($("drawCount").value)||1);const count=$("noRepeat").checked?Math.min(need,available.length):need;const pool=[...available],out=[];while(pool.length&&out.length<count){const i=Math.floor(Math.random()*pool.length);out.push(pool.splice(i,1)[0])}if(!$("noRepeat").checked&&available.length){while(out.length<need)out.push(available[Math.floor(Math.random()*available.length)])}if($("noRepeat").checked)drawn=[...drawn,...out];renderResults(out);const left=activeCandidates().length;const msg=$("noRepeat").checked&&left===0?"本輪抽籤池已抽完。每個符合條件的座號都已被抽過，請重置抽籤池再開始下一輪。":`本次抽出 ${out.length} 人，抽籤池剩餘 ${left} 人。`;renderPool(msg)}
+  ["maxNo","drawCount","exclude","noRepeat"].forEach(id=>$(id).addEventListener("input",renderPool));
+  $("draw").onclick=pick;$("resetPool").onclick=()=>{drawn=[];renderPool("已重置抽籤池，可以開始新一輪不重複抽籤。")};$("clear").onclick=()=>{lastResults=[];$("resultGrid").innerHTML='<div class="result-card empty">READY</div>';renderPool("畫面結果已清除，抽籤池狀態保留。")};$("copyResult").onclick=()=>navigator.clipboard?.writeText(lastResults.length?lastResults.map(n=>`${n}號`).join("、"):"目前無抽籤結果。");
+  load();renderPool();
+</script>
+</body>
+</html>

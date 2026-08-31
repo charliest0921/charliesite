@@ -44,7 +44,7 @@ const defaultWidgets = [
     color: "green",
     tag: "Tools",
     icon: "tools",
-    enabled: false,
+    enabled: true,
     order: 3
   },
   {
