@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>外部連結 | 班級操作台</title>
+  <link rel="stylesheet" href="./class-console.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="brand" href="./class-console.html">
+        <span class="mark">C</span>
+        <span><h1>外部連結</h1><p>Teaching links</p></span>
+      </a>
+      <nav class="nav-actions" aria-label="分頁導覽">
+        <a class="ghost" href="./class-console.html">操作台</a>
+        <a class="ghost" href="./class-schedule.html">行事曆和課表</a>
+        <a class="ghost" href="./class-documents.html">班級表單</a>
+        <a class="ghost" href="./index.html">回首頁</a>
+      </nav>
+    </header>
+
+    <section class="hero compact-hero">
+      <span>Link Board</span>
+      <h2>上課常用網站，一打開就能點。</h2>
+      <p>這頁取消新增與編輯功能，連結直接固定在網頁裡。需要改網址時，我可以再幫你直接改 HTML/資料檔。</p>
+    </section>
+
+    <section class="link-grid static-links" id="linkGrid" aria-label="外部連結列表"></section>
+  </main>
+
+  <script src="./class-console-data.js"></script>
+  <script>
+    const links = window.ClassConsoleStore.links;
+    const grid = document.getElementById("linkGrid");
+
+    grid.innerHTML = links.map((link, index) => `
+      <a class="link-card ${["cyan", "amber", "green", "rose", "violet", "blue"][index % 6]}" href="${link.url}" target="_blank" rel="noopener">
+        <span class="pill">${link.category}</span>
+        <strong>${link.title}</strong>
+        <p>${link.note}</p>
+        <small>${link.url}</small>
+        <span class="button link-open">開啟</span>
+      </a>
+    `).join("");
+  </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>班級操作台 | Charlie 的班級網站</title>
+  <link rel="stylesheet" href="./class-console.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="mark">C</span>
+        <span><h1>班級操作台</h1><p>Classroom console</p></span>
+      </a>
+      <nav class="nav-actions" aria-label="主要導覽">
+        <a class="ghost" href="./class-schedule.html">行事曆和課表</a>
+        <a class="ghost" href="./class-documents.html">班級表單</a>
+        <a class="ghost" href="./class-links.html">外部連結</a>
+        <a class="ghost" href="./index.html">回首頁</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <span>Classroom Console</span>
+      <h2>把課表、資料和上課連結，放在同一個乾淨入口。</h2>
+      <p>這裡切成三個分頁：行事曆與課表、班級相關表單、外部連結。檔案直接放在網站資料夾裡，和 HTML 一起上傳到 GitHub 就能使用。</p>
+    </section>
+
+    <section class="console-grid" aria-label="班級操作台分頁">
+      <a class="entry-card cyan" href="./class-schedule.html">
+        <span class="pill">Calendar</span>
+        <strong>行事曆和課表</strong>
+        <p>左邊固定讀取學校行事曆 PDF，右邊固定讀取班級課表圖片。</p>
+        <small id="scheduleStatus">讀取狀態中</small>
+      </a>
+      <a class="entry-card amber" href="./class-documents.html">
+        <span class="pill">Forms</span>
+        <strong>班級相關使用表單</strong>
+        <p>收學校資料、掃地區域圖、逃生演練資訊，以及任何常用 PDF。</p>
+        <small id="documentStatus">讀取狀態中</small>
+      </a>
+      <a class="entry-card green" href="./class-links.html">
+        <span class="pill">Links</span>
+        <strong>外部連結</strong>
+        <p>康軒、南一、翰林、字典、上石系統、iCloud 和 AI 工具入口。</p>
+        <small id="linkStatus">讀取狀態中</small>
+      </a>
+    </section>
+  </main>
+
+  <script src="./class-console-data.js"></script>
+  <script>
+    (async () => {
+      const store = window.ClassConsoleStore;
+      document.getElementById("scheduleStatus").textContent = "資料夾：class-console-files/schedule";
+      document.getElementById("documentStatus").textContent = `固定顯示 ${store.formFiles.length} 個 PDF 位置`;
+      document.getElementById("linkStatus").textContent = `固定顯示 ${store.links.length} 個連結`;
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>班級相關使用表單 | 班級操作台</title>
+  <link rel="stylesheet" href="./class-console.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="brand" href="./class-console.html">
+        <span class="mark">C</span>
+        <span><h1>班級相關使用表單</h1><p>資料夾：class-console-files/forms</p></span>
+      </a>
+      <nav class="nav-actions" aria-label="分頁導覽">
+        <a class="ghost" href="./class-console.html">操作台</a>
+        <a class="ghost" href="./class-schedule.html">行事曆和課表</a>
+        <a class="ghost" href="./class-links.html">外部連結</a>
+        <a class="ghost" href="./index.html">回首頁</a>
+      </nav>
+    </header>
+
+    <section class="hero compact-hero">
+      <span>Class Archive</span>
+      <h2>相關表件固定讀取 1.pdf 到 10.pdf。</h2>
+      <p>把檔案放進 <b>class-console-files/forms</b>，命名為 1.pdf、2.pdf、3.pdf，依此類推。點選左側清單可以在右側預覽，也能另開檔案。</p>
+    </section>
+
+    <section class="document-browser">
+      <aside class="panel document-list" aria-label="相關表件清單">
+        <div class="toolbar">
+          <div>
+            <span class="section-kicker">Forms</span>
+            <h2>表件清單</h2>
+          </div>
+        </div>
+        <div class="file-list" id="fileList"></div>
+      </aside>
+
+      <section class="preview document-preview" id="preview" aria-label="表件預覽">
+        <iframe src="./class-console-files/forms/1.pdf" title="相關表件 1"></iframe>
+      </section>
+    </section>
+  </main>
+
+  <script src="./class-console-data.js"></script>
+  <script>
+    const forms = window.ClassConsoleStore.formFiles;
+    const list = document.getElementById("fileList");
+    const preview = document.getElementById("preview");
+
+    function renderForms() {
+      list.innerHTML = forms.map((file, index) => `
+        <article class="file-row form-row ${index === 0 ? "active" : ""}" data-path="${file.path}">
+          <div>
+            <h3>${file.title}</h3>
+            <p>${file.filename}</p>
+          </div>
+          <div class="row-actions">
+            <button class="button" type="button" data-view="${file.path}" data-title="${file.title}">觀看</button>
+            <a class="ghost" href="${file.path}" target="_blank" rel="noopener">另開</a>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    list.addEventListener("click", (event) => {
+      const path = event.target.dataset.view;
+      const title = event.target.dataset.title;
+      if (!path) return;
+      preview.innerHTML = `<iframe src="${path}" title="${title}"></iframe>`;
+      document.querySelectorAll(".form-row").forEach((row) => row.classList.toggle("active", row.dataset.path === path));
+    });
+
+    renderForms();
+  </script>
+</body>
+</html>

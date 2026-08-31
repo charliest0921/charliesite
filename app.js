@@ -34,7 +34,7 @@ const defaultWidgets = [
     color: "cyan",
     tag: "Class",
     icon: "calendar",
-    enabled: false,
+    enabled: true,
     order: 2
   },
   {
@@ -89,6 +89,12 @@ const icons = {
 };
 
 const fixedWidgetLinks = {
+  "班級操作台": {
+    href: "./class-console.html",
+    enabled: true,
+    tag: "Class",
+    icon: "calendar"
+  },
   "班經小工具": {
     href: "./class-tools.html",
     enabled: true,

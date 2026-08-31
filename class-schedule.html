@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>行事曆和課表 | 班級操作台</title>
+  <link rel="stylesheet" href="./class-console.css" />
+</head>
+<body class="schedule-page">
+  <main class="schedule-shell">
+    <header class="topbar schedule-topbar">
+      <a class="brand" href="./class-console.html">
+        <span class="mark">C</span>
+        <span><h1>行事曆和課表</h1><p>資料夾：class-console-files/schedule</p></span>
+      </a>
+      <nav class="nav-actions" aria-label="分頁導覽">
+        <a class="ghost" href="./class-console.html">操作台</a>
+        <a class="ghost" href="./class-documents.html">班級表單</a>
+        <a class="ghost" href="./class-links.html">外部連結</a>
+        <a class="ghost" href="./index.html">回首頁</a>
+      </nav>
+    </header>
+
+    <section class="split-board" aria-label="行事曆與課表">
+      <article class="viewer-pane">
+        <div class="viewer-head">
+          <strong>左邊：學校行事曆</strong>
+          <a class="ghost compact" href="./class-console-files/schedule/1.pdf" target="_blank" rel="noopener">另開 PDF</a>
+        </div>
+        <iframe src="./class-console-files/schedule/1.pdf" title="學校行事曆 PDF"></iframe>
+      </article>
+
+      <article class="viewer-pane">
+        <div class="viewer-head">
+          <strong>右邊：班級課表</strong>
+          <a class="ghost compact" href="./class-console-files/schedule/2.jpeg" target="_blank" rel="noopener">另開圖片</a>
+        </div>
+        <img src="./class-console-files/schedule/2.jpeg" alt="班級課表">
+      </article>
+    </section>
+  </main>
+</body>
+</html>
