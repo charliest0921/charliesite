@@ -88,6 +88,26 @@ const icons = {
   admin: '<path d="M12 1v22" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />'
 };
 
+const fixedWidgetLinks = {
+  "班經小工具": {
+    href: "./class-tools.html",
+    enabled: true,
+    tag: "Tools",
+    icon: "tools"
+  },
+  "工作後台": {
+    href: "./admin.html",
+    enabled: true,
+    tag: "Firebase",
+    icon: "admin"
+  }
+};
+
+function normalizeWidget(widget) {
+  const fixed = fixedWidgetLinks[String(widget.title || "").trim()];
+  return fixed ? { ...widget, ...fixed } : widget;
+}
+
 const formatter = new Intl.DateTimeFormat("zh-Hant-TW", {
   year: "numeric",
   month: "long",
@@ -264,16 +284,17 @@ function iconSvg(name) {
 }
 
 function widgetTemplate(widget) {
-  const enabled = widget.enabled && widget.href;
-  const href = enabled ? widget.href : "#";
+  const normalized = normalizeWidget(widget);
+  const enabled = normalized.enabled && normalized.href;
+  const href = enabled ? normalized.href : "#";
   return `
-    <a class="widget ${widget.color || "blue"}" href="${href}" ${enabled ? "" : 'data-placeholder="true"'}>
+    <a class="widget ${normalized.color || "blue"}" href="${href}" ${enabled ? "" : 'data-placeholder="true"'}>
       <div class="widget-top">
-        <span class="widget-icon">${iconSvg(widget.icon)}</span>
-        <span class="tag">${widget.tag || "Widget"}</span>
+        <span class="widget-icon">${iconSvg(normalized.icon)}</span>
+        <span class="tag">${normalized.tag || "Widget"}</span>
       </div>
-      <h3>${widget.title || "未命名 Widget"}</h3>
-      <p>${widget.description || "這個區塊尚未填寫說明。"}</p>
+      <h3>${normalized.title || "未命名 Widget"}</h3>
+      <p>${normalized.description || "這個區塊尚未填寫說明。"}</p>
       <span class="widget-footer">進入區塊<span class="arrow">${iconSvg("arrow")}</span></span>
     </a>
   `;
