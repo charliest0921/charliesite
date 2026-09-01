@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>課程應用程式 | Charlie 的班級網站</title>
+  <style>
+    :root {
+      --bg: #05070d;
+      --ink: #f3f7ff;
+      --muted: #a9b4c7;
+      --line: rgba(232, 238, 255, 0.16);
+      --cyan: #00f5d4;
+      --blue: #35a7ff;
+      --green: #b8ff33;
+      --amber: #ffb000;
+      --rose: #ff2e88;
+      --violet: #a855f7;
+      --radius: 8px;
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 176, 0, 0.22), transparent 24rem),
+        radial-gradient(circle at 88% 8%, rgba(0, 245, 212, 0.18), transparent 28rem),
+        radial-gradient(circle at 48% 100%, rgba(255, 46, 136, 0.11), transparent 30rem),
+        linear-gradient(135deg, #03040a 0%, #080b12 45%, #11151f 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(115deg, transparent 0 43%, rgba(255,176,0,0.08) 43% 44%, transparent 44% 100%);
+      background-size: 42px 42px, 42px 42px, 100% 100%;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 82%);
+      pointer-events: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .page {
+      width: min(1160px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 26px 0 46px;
+    }
+
+    .topbar,
+    .hero,
+    .app-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.04)),
+        rgba(8, 11, 19, 0.62);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 24px 70px rgba(0,0,0,0.42);
+      backdrop-filter: blur(24px) saturate(165%);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--amber), var(--green), var(--cyan));
+      color: #02040a;
+      font-weight: 950;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 2.6vw, 1.7rem);
+      line-height: 1.12;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+    }
+
+    .home {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 13px;
+      border: 1px solid rgba(232,238,255,0.18);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.08);
+      font-weight: 850;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(22px, 4vw, 40px);
+      margin-bottom: 16px;
+    }
+
+    .hero::after {
+      content: "x";
+      position: absolute;
+      right: clamp(18px, 6vw, 74px);
+      bottom: -34px;
+      color: rgba(255, 176, 0, 0.12);
+      font-size: clamp(8rem, 18vw, 15rem);
+      font-weight: 950;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .hero span {
+      color: var(--amber);
+      font-weight: 900;
+      text-shadow: 0 0 18px rgba(255,176,0,0.38);
+    }
+
+    .hero h2 {
+      position: relative;
+      z-index: 1;
+      max-width: 850px;
+      margin: 10px 0 12px;
+      font-size: clamp(2rem, 5vw, 4.1rem);
+      line-height: 0.98;
+      text-wrap: balance;
+    }
+
+    .hero p {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0;
+      color: #bcc7d9;
+      line-height: 1.75;
+      font-size: 1.08rem;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 22px 0 12px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 2.6vw, 2rem);
+    }
+
+    .section-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .app-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 260px;
+      padding: 20px;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .app-card:hover {
+      transform: translateY(-4px);
+      border-color: currentColor;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 0 32px color-mix(in srgb, currentColor 28%, transparent), 0 26px 58px rgba(0,0,0,0.48);
+    }
+
+    .app-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 0%, currentColor, transparent 22rem);
+      opacity: 0.12;
+    }
+
+    .app-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+
+    .app-icon {
+      display: grid;
+      width: 54px;
+      height: 54px;
+      place-items: center;
+      border: 1px solid rgba(232,238,255,0.18);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .app-icon svg {
+      width: 30px;
+      height: 30px;
+      stroke-width: 2.2;
+    }
+
+    .tag {
+      color: #dbe7ff;
+      font-size: 0.85rem;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .app-card h3 {
+      margin: 0 0 10px;
+      color: white;
+      font-size: clamp(1.55rem, 3vw, 2.35rem);
+      line-height: 1.05;
+    }
+
+    .app-card p {
+      max-width: 560px;
+      margin: 0;
+      color: #aab6c9;
+      line-height: 1.65;
+      font-size: 1rem;
+    }
+
+    .app-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 28px;
+      color: #f7fbff;
+      font-weight: 900;
+    }
+
+    .arrow {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 1px solid rgba(232,238,255,0.2);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .arrow svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .amber { color: var(--amber); }
+    .cyan { color: var(--cyan); }
+
+    @media (max-width: 760px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .home {
+        width: 100%;
+      }
+
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .app-card {
+        min-height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="mark">C</span>
+        <span><h1>課程應用程式</h1><p>Course apps</p></span>
+      </a>
+      <a class="home" href="./index.html">回首頁</a>
+    </header>
+
+    <section class="hero">
+      <span>Math Practice</span>
+      <h2>把單元練習做成可以直接開玩的課堂任務。</h2>
+      <p>目前先放入兩個因數與數論主題遊戲，適合投影互動、平板練習或學生個別挑戰。</p>
+    </section>
+
+    <section aria-labelledby="math-apps-title">
+      <div class="section-head">
+        <div>
+          <h2 id="math-apps-title">數學遊戲</h2>
+          <p>因數、質數與合數的快速判斷練習。</p>
+        </div>
+      </div>
+
+      <div class="app-grid">
+        <a class="app-card amber" href="./factor-fruit-ninja.html">
+          <div class="app-top">
+            <span class="app-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M8 5h8" />
+                <path d="M12 5v14" />
+                <path d="M5 12h14" />
+                <path d="M7 7l10 10" />
+                <path d="M17 7L7 17" />
+              </svg>
+            </span>
+            <span class="tag">Factor Game</span>
+          </div>
+          <h3>因數分解</h3>
+          <p>看到題目數字後，從水果選項中切出兩個相乘剛好等於題目的因數。</p>
+          <span class="app-footer">開始遊戲<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></span>
+        </a>
+
+        <a class="app-card cyan" href="./prime-composite-fruit-ninja.html">
+          <div class="app-top">
+            <span class="app-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="7" cy="7" r="3" />
+                <circle cx="17" cy="7" r="3" />
+                <circle cx="7" cy="17" r="3" />
+                <circle cx="17" cy="17" r="3" />
+              </svg>
+            </span>
+            <span class="tag">Prime Game</span>
+          </div>
+          <h3>找出質數或合數</h3>
+          <p>依照每題指定的目標，從水果中找出符合條件的質數或合數。</p>
+          <span class="app-footer">開始遊戲<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg></span></span>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

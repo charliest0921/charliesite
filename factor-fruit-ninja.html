@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>因數分解水果忍者</title>
+  <style>
+    :root {
+      --bg: #05070d;
+      --ink: #f3f7ff;
+      --muted: #a9b4c7;
+      --panel: rgba(13, 18, 31, .72);
+      --line: rgba(232, 238, 255, .16);
+      --cyan: #00f5d4;
+      --blue: #35a7ff;
+      --green: #b8ff33;
+      --amber: #ffb000;
+      --rose: #ff2e88;
+      --violet: #a855f7;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .54);
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(0, 245, 212, .22), transparent 24rem),
+        radial-gradient(circle at 88% 10%, rgba(255, 46, 136, .2), transparent 26rem),
+        radial-gradient(circle at 50% 100%, rgba(255, 176, 0, .13), transparent 30rem),
+        linear-gradient(135deg, #03040a 0%, #080b12 42%, #10131c 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, .03) 1px, transparent 1px),
+        linear-gradient(115deg, transparent 0 42%, rgba(0, 245, 212, .08) 42% 43%, transparent 43% 100%);
+      background-size: 42px 42px, 42px 42px, 100% 100%;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, .9), transparent 82%);
+      pointer-events: none;
+    }
+
+    button, select { font: inherit; }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto minmax(260px, 1fr) auto;
+      gap: 12px;
+      width: 100vw;
+      height: 100vh;
+      min-height: 620px;
+      padding: 14px;
+    }
+
+    .hud, .arena-wrap, .control-panel, .start-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .035)),
+        var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px) saturate(145%);
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 14px 16px;
+      min-height: 122px;
+    }
+
+    .kicker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(0, 245, 212, .14);
+      color: #dffcff;
+      white-space: nowrap;
+    }
+
+    .prompt {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 56px);
+      line-height: 1.04;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .subprompt {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(84px, 1fr));
+      gap: 8px;
+      align-content: start;
+    }
+
+    .stat {
+      min-width: 72px;
+      padding: 8px 10px;
+      border: 1px solid rgba(232, 238, 255, .12);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .06);
+      text-align: center;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 24px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .arena-wrap {
+      position: relative;
+      overflow: hidden;
+      min-height: 300px;
+      background:
+        linear-gradient(180deg, rgba(0, 245, 212, .08), rgba(255, 46, 136, .055)),
+        rgba(3, 4, 10, .5);
+    }
+
+    .arena-label {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      z-index: 2;
+      color: rgba(243, 247, 255, .46);
+      font-size: 13px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    .control-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      padding: 12px;
+    }
+
+    .settings {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr);
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 4px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    select {
+      width: 100%;
+      height: 42px;
+      border: 1px solid rgba(232, 238, 255, .16);
+      border-radius: 6px;
+      padding: 0 10px;
+      background: rgba(3, 4, 10, .78);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .action {
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue) 54%, var(--rose));
+      color: #03040a;
+      font-weight: 900;
+      box-shadow: 0 0 24px rgba(0, 245, 212, .24), 0 14px 28px rgba(0, 0, 0, .22);
+      white-space: nowrap;
+    }
+
+    .toast {
+      position: absolute;
+      z-index: 4;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(520px, calc(100% - 28px));
+      padding: 12px 16px;
+      border: 1px solid rgba(232, 238, 255, .16);
+      border-radius: 8px;
+      background: rgba(3, 4, 10, .88);
+      color: var(--ink);
+      text-align: center;
+      font-weight: 900;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, calc(-50% + 8px));
+    }
+
+    .start-layer {
+      position: absolute;
+      z-index: 8;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(3, 4, 10, .76);
+    }
+
+    .start-layer[hidden] { display: none; }
+
+    .start-panel {
+      width: min(760px, 100%);
+      padding: 22px;
+    }
+
+    .start-panel h1 {
+      margin: 0 0 10px;
+      font-size: clamp(34px, 5vw, 60px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .start-panel p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+      font-weight: 700;
+    }
+
+    .start-settings {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 16px 0;
+      padding: 12px;
+      border: 1px solid rgba(232, 238, 255, .14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 840px) {
+      .app { min-height: 680px; }
+      .hud, .control-panel { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .stat { min-width: 0; padding: 7px 6px; }
+      .stat strong { font-size: 20px; }
+      .settings, .start-settings { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="因數分解水果忍者">
+    <section class="hud" aria-label="題目與成績">
+      <div>
+        <div class="kicker">
+          <span class="badge">因數分解</span>
+          <span id="levelBadge">初階：1-100</span>
+          <span id="roundInfo">待開始</span>
+        </div>
+        <p class="prompt" id="prompt">先選等級</p>
+        <div class="subprompt" id="subprompt">每題正確答案永遠是兩個水果，畫面固定出現 8 個選項。</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span>破關</span><strong id="cleared">0</strong></div>
+        <div class="stat"><span>總花費時間</span><strong id="elapsed">0</strong></div>
+        <div class="stat"><span>已切</span><strong id="picked">0/2</strong></div>
+      </div>
+    </section>
+
+    <section class="arena-wrap" id="arenaWrap" aria-label="遊戲區域">
+      <span class="arena-label">水果飛行與切割區</span>
+      <canvas id="game" aria-label="滑動切水果作答區"></canvas>
+      <div class="toast" id="toast"></div>
+    </section>
+
+    <section class="control-panel" aria-label="遊戲設定">
+      <div class="settings">
+        <div class="field">
+          <label for="levelSelect">等級</label>
+          <select id="levelSelect">
+            <option value="easy">初階：1-100</option>
+            <option value="middle">中階：101-1000</option>
+            <option value="advanced">進階：1001-10000</option>
+            <option value="challenge">挑戰：10001-100000</option>
+          </select>
+        </div>
+      </div>
+      <button class="action" id="startButton" type="button">開始</button>
+    </section>
+
+    <section class="start-layer" id="startLayer">
+      <div class="start-panel">
+        <h1>因數分解水果忍者</h1>
+        <p>只保留一種關卡：看到題目數字後，從 8 顆水果中切出兩個相乘剛好等於題目的數。不會出現 1 乘本身這種題目。</p>
+        <div class="start-settings">
+          <div class="field">
+            <label for="introLevelSelect">等級</label>
+            <select id="introLevelSelect">
+              <option value="easy">初階：1-100</option>
+              <option value="middle">中階：101-1000</option>
+              <option value="advanced">進階：1001-10000</option>
+              <option value="challenge">挑戰：10001-100000</option>
+            </select>
+          </div>
+        </div>
+        <p id="resultText">破關卡數：____  總花費時間數：________</p>
+        <div class="result-actions">
+          <button class="action" id="introStart" type="button">開始切水果</button>
+          <button class="action" id="showTodayButton" type="button" hidden>我今天玩到這裡</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const arenaWrap = document.getElementById("arenaWrap");
+    const levelSelect = document.getElementById("levelSelect");
+    const introLevelSelect = document.getElementById("introLevelSelect");
+    const startLayer = document.getElementById("startLayer");
+    const startButton = document.getElementById("startButton");
+    const introStart = document.getElementById("introStart");
+    const showTodayButton = document.getElementById("showTodayButton");
+    const resultText = document.getElementById("resultText");
+    const clearedEl = document.getElementById("cleared");
+    const elapsedEl = document.getElementById("elapsed");
+    const pickedEl = document.getElementById("picked");
+    const levelBadge = document.getElementById("levelBadge");
+    const roundInfo = document.getElementById("roundInfo");
+    const promptEl = document.getElementById("prompt");
+    const subpromptEl = document.getElementById("subprompt");
+    const toast = document.getElementById("toast");
+
+    const levels = {
+      easy: { name: "初階", min: 1, max: 100, label: "1-100", minFactor: 2, maxRatio: 10 },
+      middle: { name: "中階", min: 101, max: 1000, label: "101-1000", minFactor: 3, maxRatio: 8 },
+      advanced: { name: "進階", min: 1001, max: 10000, label: "1001-10000", minFactor: 7, maxRatio: 10 },
+      challenge: { name: "挑戰", min: 10001, max: 100000, label: "10001-100000", minFactor: 11, maxRatio: 12 }
+    };
+
+    const fruitColors = [
+      ["#f25f5c", "#ffcf56"], ["#22a06b", "#b8ff33"], ["#7557d8", "#c2a9ff"],
+      ["#ffb000", "#ffe08a"], ["#e95675", "#ffd3dd"], ["#35a7ff", "#bfeeff"],
+      ["#00f5d4", "#dffcff"], ["#a855f7", "#f0d7ff"]
+    ];
+
+    const state = {
+      running: false,
+      cleared: 0,
+      elapsed: 0,
+      round: 0,
+      fruits: [],
+      particles: [],
+      pointerTrail: [],
+      pointerDown: false,
+      question: null,
+      lastFrame: 0,
+      timerId: null,
+      picked: [],
+      gameStartedAt: 0,
+      lastResult: null
+    };
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function choice(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function gcd(a, b) {
+      while (b) [a, b] = [b, a % b];
+      return Math.abs(a);
+    }
+
+    function isPrime(n) {
+      if (n < 2) return false;
+      if (n === 2) return true;
+      if (n % 2 === 0) return false;
+      for (let d = 3; d * d <= n; d += 2) {
+        if (n % d === 0) return false;
+      }
+      return true;
+    }
+
+    function divisors(n) {
+      const out = [];
+      for (let d = 1; d * d <= n; d++) {
+        if (n % d === 0) {
+          out.push(d);
+          if (d * d !== n) out.push(n / d);
+        }
+      }
+      return [...new Set(out)].sort((a, b) => a - b);
+    }
+
+    function isTooEasyNumber(n, levelKey) {
+      if (levelKey === "easy") return false;
+      if (n % 5 === 0 || n % 10 === 0 || n % 100 === 0) return true;
+      if (n % 11 === 0 && n < 1000) return true;
+      return /00$|50$|25$|75$/.test(String(n));
+    }
+
+    function factorPairs(n, levelKey) {
+      const level = levels[levelKey];
+      const pairs = [];
+      divisors(n).forEach(d => {
+        const other = n / d;
+        if (!Number.isInteger(other)) return;
+        if (d <= 1 || other <= 1 || d >= n || other >= n || d > other) return;
+        if (d < level.minFactor) return;
+        if (other / d > level.maxRatio) return;
+        pairs.push([d, other]);
+      });
+      return pairs;
+    }
+
+    function makeNumber(levelKey) {
+      const level = levels[levelKey];
+      let n = rand(level.min, level.max);
+      let guard = 0;
+      while ((n < 10 || isTooEasyNumber(n, levelKey) || isPrime(n) || factorPairs(n, levelKey).length === 0) && guard < 12000) {
+        n = rand(level.min, level.max);
+        guard += 1;
+      }
+      return n;
+    }
+
+    function makeFactorPair(n, levelKey) {
+      return choice(factorPairs(n, levelKey));
+    }
+
+    function uniqueNumbers(items) {
+      return [...new Set(items.filter(n => Number.isInteger(n) && n > 0))];
+    }
+
+    function optionAllowed(n, value, levelKey, answers, existing) {
+      if (!Number.isInteger(value) || value <= 1 || value >= n) return false;
+      if (answers.includes(value) || existing.includes(value)) return false;
+      if (n % 2 === 1 && value % 2 === 0) return false;
+      if (levelKey !== "easy" && value % 5 === 0) return false;
+      if (createsExtraPair(n, value, [...answers, ...existing])) return false;
+      return true;
+    }
+
+    function nearbyValues(center, spread, n, levelKey) {
+      const values = [];
+      for (let offset = -spread; offset <= spread; offset++) {
+        if (offset === 0) continue;
+        let v = center + offset;
+        if (n % 2 === 1 && v % 2 === 0) v += 1;
+        if (levelKey !== "easy" && v % 5 === 0) v += 1;
+        values.push(v);
+      }
+      return values;
+    }
+
+    function makeDistractors(n, answers, levelKey) {
+      const [a, b] = answers;
+      const answerSet = new Set(answers);
+      const factors = divisors(n);
+      const root = Math.max(1, Math.round(Math.sqrt(n)));
+      const low = Math.max(2, Math.floor(Math.min(a, b) * .45));
+      const high = n < 40 ? n - 1 : Math.min(n - 1, Math.ceil(Math.max(a, b) * 1.65));
+      const spread = levelKey === "easy" ? 5 : levelKey === "middle" ? 9 : levelKey === "advanced" ? 18 : 32;
+      const seeds = uniqueNumbers([
+        ...factors.filter(v => !answerSet.has(v)),
+        ...nearbyValues(a, spread, n, levelKey),
+        ...nearbyValues(b, spread, n, levelKey),
+        Math.max(2, a * 2), Math.max(2, b * 2),
+        Math.max(2, Math.floor(a / 2)), Math.max(2, Math.floor(b / 2)),
+        Math.max(2, root - 2), root - 1, root + 1, root + 2,
+        Math.max(2, Math.floor((a + b) / 2)), Math.max(2, Math.abs(b - a))
+      ]);
+      const out = [];
+
+      seeds.forEach(v => {
+        if (out.length < 6 && v >= low && v <= high && optionAllowed(n, v, levelKey, answers, out)) out.push(v);
+      });
+
+      let attempts = 0;
+      while (out.length < 6 && attempts < 1600) {
+        const dynamicLow = attempts < 500 ? low : 2;
+        const dynamicHigh = attempts < 500 ? Math.max(low, high) : n - 1;
+        let candidate = rand(dynamicLow, dynamicHigh);
+        if (n % 2 === 1 && candidate % 2 === 0) candidate += 1;
+        if (levelKey !== "easy" && candidate % 5 === 0) candidate += choice([-2, -1, 1, 2]);
+        if (optionAllowed(n, candidate, levelKey, answers, out)) out.push(candidate);
+        attempts += 1;
+      }
+      return out.slice(0, 6);
+    }
+
+    function createsExtraPair(n, candidate, existing) {
+      return existing.some(v => v * candidate === n);
+    }
+
+    function makeQuestion() {
+      const levelKey = levelSelect.value;
+      let n = makeNumber(levelKey);
+      let answers = makeFactorPair(n, levelKey);
+      let distractors = makeDistractors(n, answers, levelKey);
+      let guard = 0;
+      while (distractors.length < 6 && guard < 80) {
+        n = makeNumber(levelKey);
+        answers = makeFactorPair(n, levelKey);
+        distractors = makeDistractors(n, answers, levelKey);
+        guard += 1;
+      }
+      state.question = {
+        n,
+        answers,
+        options: [
+          ...answers.map((value, index) => ({ value, correct: true, key: `answer-${index}` })),
+          ...distractors.map((value, index) => ({ value, correct: false, key: `trap-${index}` }))
+        ].sort(() => Math.random() - .5)
+      };
+      state.round += 1;
+      state.picked = [];
+      promptEl.textContent = `切出 ${n} 的兩個因數`;
+      subpromptEl.textContent = "任切兩顆，乘積等於題目就過關；第二刀切錯就結束。";
+      roundInfo.textContent = `第 ${state.round} 題`;
+      spawnOptions();
+      updateHud();
+    }
+
+    function resizeCanvas() {
+      const rect = arenaWrap.getBoundingClientRect();
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function currentPace() {
+      return .82;
+    }
+
+    function spawnOptions() {
+      state.fruits.length = 0;
+      const rect = arenaWrap.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      state.question.options.forEach((item, index) => {
+        const row = Math.floor(index / 4);
+        const col = index % 4;
+        const pace = currentPace();
+        const color = choice(fruitColors);
+        const radius = Math.max(32, Math.min(54, 28 + String(item.value).length * 5));
+        const cellW = w / 4;
+        const cellH = h / 2;
+        const x = Math.max(radius + 10, Math.min(w - radius - 10, cellW * (col + .5) + rand(-36, 36)));
+        const y = Math.max(radius + 28, Math.min(h - radius - 10, cellH * (row + .5) + rand(-28, 28)));
+        const speed = rand(58, 98) * pace;
+        state.fruits.push({
+          value: item.value,
+          correct: item.correct,
+          key: item.key,
+          x, y,
+          vx: choice([-1, 1]) * speed,
+          vy: choice([-1, 1]) * rand(48, 90) * pace,
+          radius,
+          rotation: Math.random() * Math.PI,
+          spin: rand(-3, 3),
+          colorA: color[0],
+          colorB: color[1],
+          sliced: false,
+          selected: false
+        });
+      });
+    }
+
+    function startGame(resetRun = true) {
+      state.running = true;
+      state.fruits.length = 0;
+      state.particles.length = 0;
+      state.pointerTrail.length = 0;
+      state.picked = [];
+      state.round = 0;
+      state.elapsed = 0;
+      state.lastResult = null;
+      state.gameStartedAt = performance.now();
+      if (resetRun) {
+        state.cleared = 0;
+      }
+      startLayer.hidden = true;
+      showTodayButton.hidden = true;
+      clearInterval(state.timerId);
+      state.timerId = setInterval(tickTimer, 1000);
+      makeQuestion();
+      showToast("開始！切出兩個因數");
+    }
+
+    function currentElapsedSeconds() {
+      if (!state.gameStartedAt) return state.elapsed;
+      return Math.max(1, Math.ceil((performance.now() - state.gameStartedAt) / 1000));
+    }
+
+    function tickTimer() {
+      if (!state.running) return;
+      state.elapsed = currentElapsedSeconds();
+      updateHud();
+    }
+
+    function endGame(message) {
+      state.running = false;
+      state.fruits.length = 0;
+      clearInterval(state.timerId);
+      state.elapsed = currentElapsedSeconds();
+      state.lastResult = {
+        cleared: state.cleared,
+        elapsed: state.elapsed,
+        level: levelSelect.value
+      };
+      startButton.textContent = "再玩一次";
+      showTodayButton.hidden = false;
+      resultText.textContent = formatResult(state.lastResult);
+      showToast(`${message}，${formatResult(state.lastResult)}`);
+      setTimeout(() => {
+        startLayer.hidden = false;
+        document.querySelector(".start-panel h1").textContent = "遊戲結束";
+        document.querySelector(".start-panel p").textContent = "規則：任切兩顆，乘積等於題目就過關；切錯立刻結束。";
+        resultText.textContent = formatResult(state.lastResult);
+      }, 850);
+    }
+
+    function updateHud() {
+      const level = levels[levelSelect.value];
+      levelBadge.textContent = `${level.name}：${level.label}`;
+      clearedEl.textContent = state.cleared;
+      elapsedEl.textContent = state.elapsed;
+      pickedEl.textContent = `${state.picked.length}/2`;
+    }
+
+    function updateReadyText() {
+      if (state.running) return;
+      const level = levels[levelSelect.value];
+      levelBadge.textContent = `${level.name}：${level.label}`;
+      promptEl.textContent = "先選等級";
+      subpromptEl.textContent = "每題固定 8 個選項，任意兩顆相乘等於題目就過。";
+      roundInfo.textContent = "待開始";
+      resultText.textContent = "破關卡數：____  總花費時間數：________";
+    }
+
+    function formatResult(result) {
+      return `破關卡數：${result.cleared}  總花費時間數：${result.elapsed} 秒`;
+    }
+
+    function showTodayResult() {
+      if (!state.lastResult) return;
+      resultText.textContent = formatResult(state.lastResult);
+      showToast(formatResult(state.lastResult));
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.id);
+      showToast.id = setTimeout(() => toast.classList.remove("show"), 1050);
+    }
+
+    function sliceFruit(fruit) {
+      if (!state.running || fruit.sliced) return;
+      fruit.sliced = true;
+      state.picked.push(fruit.value);
+      if (state.picked.length === 1) {
+        burst(fruit, true);
+        showToast(`已切 ${fruit.value}，再切 1 顆`);
+      } else if (state.picked.length === 2) {
+        const product = state.picked[0] * state.picked[1];
+        if (product === state.question.n) {
+          state.cleared += 1;
+          state.elapsed = currentElapsedSeconds();
+          burst(fruit, true);
+          showToast(`${state.picked[0]} × ${state.picked[1]} = ${state.question.n}`);
+          setTimeout(makeQuestion, 720);
+        } else {
+          burst(fruit, false);
+          endGame(`${state.picked[0]} × ${state.picked[1]} = ${product}，答錯`);
+        }
+      }
+      updateHud();
+    }
+
+    function burst(fruit, good) {
+      for (let i = 0; i < 18; i++) {
+        state.particles.push({
+          x: fruit.x,
+          y: fruit.y,
+          vx: rand(-190, 190),
+          vy: rand(-230, 70),
+          life: rand(24, 42) / 10,
+          size: rand(3, 8),
+          color: good ? fruit.colorB : "#ff2e88"
+        });
+      }
+    }
+
+    function drawBackground(w, h) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.save();
+      ctx.globalAlpha = .28;
+      ctx.strokeStyle = "rgba(0,245,212,.16)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 12]);
+      ctx.beginPath();
+      ctx.moveTo(18, h * .18);
+      ctx.lineTo(w - 18, h * .18);
+      ctx.moveTo(18, h * .82);
+      ctx.lineTo(w - 18, h * .82);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = .11;
+      ctx.fillStyle = "#ffffff";
+      for (let x = -80; x < w + 100; x += 96) {
+        ctx.beginPath();
+        ctx.ellipse(x, h - 28, 68, 18, -.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function roundRect(c, x, y, w, h, r) {
+      c.beginPath();
+      c.moveTo(x + r, y);
+      c.lineTo(x + w - r, y);
+      c.quadraticCurveTo(x + w, y, x + w, y + r);
+      c.lineTo(x + w, y + h - r);
+      c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      c.lineTo(x + r, y + h);
+      c.quadraticCurveTo(x, y + h, x, y + h - r);
+      c.lineTo(x, y + r);
+      c.quadraticCurveTo(x, y, x + r, y);
+    }
+
+    function drawFruit(fruit) {
+      if (fruit.sliced) return;
+      ctx.save();
+      ctx.translate(fruit.x, fruit.y);
+      ctx.rotate(fruit.rotation);
+      const grad = ctx.createRadialGradient(-fruit.radius * .35, -fruit.radius * .4, 4, 0, 0, fruit.radius);
+      grad.addColorStop(0, "#fff8d7");
+      grad.addColorStop(.38, fruit.colorB);
+      grad.addColorStop(1, fruit.colorA);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, fruit.radius * 1.05, fruit.radius * .92, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.42)";
+      ctx.beginPath();
+      ctx.ellipse(-fruit.radius * .28, -fruit.radius * .28, fruit.radius * .24, fruit.radius * .13, -.45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#573b20";
+      ctx.fillRect(-3, -fruit.radius - 8, 6, 16);
+      ctx.fillStyle = "#2f8f57";
+      ctx.beginPath();
+      ctx.ellipse(12, -fruit.radius - 4, 12, 6, -.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.rotate(-fruit.rotation);
+      ctx.fillStyle = "rgba(255,255,255,.92)";
+      ctx.strokeStyle = "rgba(0,245,212,.24)";
+      ctx.lineWidth = 2;
+      const labelW = Math.max(62, String(fruit.value).length * 18 + 22);
+      roundRect(ctx, -labelW / 2, -18, labelW, 36, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#111827";
+      ctx.font = `900 ${Math.max(18, Math.min(30, 38 - String(fruit.value).length * 2))}px Microsoft JhengHei, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(fruit.value), 0, 1);
+      ctx.restore();
+    }
+
+    function drawTrail() {
+      if (state.pointerTrail.length < 2) return;
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      for (let i = 1; i < state.pointerTrail.length; i++) {
+        const a = state.pointerTrail[i - 1];
+        const b = state.pointerTrail[i];
+        ctx.globalAlpha = i / state.pointerTrail.length;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+        ctx.strokeStyle = "#00f5d4";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawParticles(dt) {
+      state.particles.forEach(p => {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 300 * dt;
+        p.life -= dt;
+        ctx.globalAlpha = Math.max(0, Math.min(1, p.life / 2));
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      state.particles = state.particles.filter(p => p.life > 0);
+    }
+
+    function animate(time) {
+      const rect = arenaWrap.getBoundingClientRect();
+      const dt = Math.min(.033, (time - state.lastFrame) / 1000 || .016);
+      state.lastFrame = time;
+      drawBackground(rect.width, rect.height);
+      if (state.running) {
+        state.fruits.forEach(fruit => {
+          fruit.x += fruit.vx * dt;
+          fruit.y += fruit.vy * dt;
+          fruit.rotation += fruit.spin * dt;
+          if (fruit.x - fruit.radius < 0) {
+            fruit.x = fruit.radius;
+            fruit.vx = Math.abs(fruit.vx);
+          }
+          if (fruit.x + fruit.radius > rect.width) {
+            fruit.x = rect.width - fruit.radius;
+            fruit.vx = -Math.abs(fruit.vx);
+          }
+          if (fruit.y - fruit.radius < 0) {
+            fruit.y = fruit.radius;
+            fruit.vy = Math.abs(fruit.vy);
+          }
+          if (fruit.y + fruit.radius > rect.height) {
+            fruit.y = rect.height - fruit.radius;
+            fruit.vy = -Math.abs(fruit.vy);
+          }
+        });
+        state.fruits = state.fruits.filter(f => !f.sliced);
+      }
+      state.fruits.forEach(drawFruit);
+      drawParticles(dt);
+      drawTrail();
+      state.pointerTrail = state.pointerTrail.filter(p => time - p.t < 260);
+      updateDebugNode();
+      requestAnimationFrame(animate);
+    }
+
+    function pointerPosition(event) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }
+
+    function addTrailPoint(pos) {
+      const now = performance.now();
+      const prev = state.pointerTrail[state.pointerTrail.length - 1];
+      state.pointerTrail.push({ x: pos.x, y: pos.y, t: now });
+      if (prev) checkLineHit(prev, pos);
+      state.pointerTrail = state.pointerTrail.slice(-12);
+    }
+
+    function distanceToSegment(px, py, ax, ay, bx, by) {
+      const dx = bx - ax;
+      const dy = by - ay;
+      const len = dx * dx + dy * dy || 1;
+      const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / len));
+      const x = ax + t * dx;
+      const y = ay + t * dy;
+      return Math.hypot(px - x, py - y);
+    }
+
+    function checkLineHit(a, b) {
+      if (!state.running) return;
+      state.fruits.forEach(fruit => {
+        if (!fruit.sliced && distanceToSegment(fruit.x, fruit.y, a.x, a.y, b.x, b.y) <= fruit.radius) {
+          sliceFruit(fruit);
+        }
+      });
+    }
+
+    function handlePointerDown(event) {
+      event.preventDefault();
+      state.pointerDown = true;
+      addTrailPoint(pointerPosition(event));
+    }
+
+    function handlePointerMove(event) {
+      if (!state.pointerDown) return;
+      event.preventDefault();
+      addTrailPoint(pointerPosition(event));
+    }
+
+    function handlePointerUp() {
+      state.pointerDown = false;
+    }
+
+    function syncFromIntro() {
+      levelSelect.value = introLevelSelect.value;
+      updateReadyText();
+    }
+
+    function syncFromPanel() {
+      introLevelSelect.value = levelSelect.value;
+      updateReadyText();
+    }
+
+    function updateDebugNode() {
+      let node = document.getElementById("fruitNinjaDebug");
+      if (!node) {
+        node = document.createElement("output");
+        node.id = "fruitNinjaDebug";
+        node.hidden = true;
+        document.body.appendChild(node);
+      }
+      node.value = JSON.stringify({
+        running: state.running,
+        cleared: state.cleared,
+        elapsed: state.elapsed,
+        picked: state.picked,
+        question: state.question ? { n: state.question.n, answers: state.question.answers } : null,
+        fruitCount: state.fruits.length,
+        fruits: state.fruits.map(f => ({ value: f.value, correct: f.correct, x: Math.round(f.x), y: Math.round(f.y), r: Math.round(f.radius) })),
+        arena: { w: Math.round(arenaWrap.getBoundingClientRect().width), h: Math.round(arenaWrap.getBoundingClientRect().height) },
+        hudBottom: Math.round(document.querySelector(".hud").getBoundingClientRect().bottom),
+        arenaTop: Math.round(arenaWrap.getBoundingClientRect().top),
+        arenaBottom: Math.round(arenaWrap.getBoundingClientRect().bottom),
+        controlTop: Math.round(document.querySelector(".control-panel").getBoundingClientRect().top)
+      });
+    }
+
+    startButton.addEventListener("click", () => startGame(true));
+    introStart.addEventListener("click", () => {
+      syncFromIntro();
+      startGame(true);
+    });
+    showTodayButton.addEventListener("click", showTodayResult);
+    levelSelect.addEventListener("change", syncFromPanel);
+    introLevelSelect.addEventListener("change", syncFromIntro);
+    canvas.addEventListener("pointerdown", handlePointerDown);
+    canvas.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      if (state.running && state.question) spawnOptions();
+    });
+
+    resizeCanvas();
+    syncFromPanel();
+    updateReadyText();
+    updateHud();
+    window.factorFruitTools = { makeFactorPair, divisors, makeNumber };
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

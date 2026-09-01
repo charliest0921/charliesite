@@ -54,7 +54,7 @@ const defaultWidgets = [
     color: "amber",
     tag: "Apps",
     icon: "apps",
-    enabled: false,
+    enabled: true,
     order: 4
   },
   {
@@ -100,6 +100,12 @@ const fixedWidgetLinks = {
     enabled: true,
     tag: "Tools",
     icon: "tools"
+  },
+  "課程應用程式": {
+    href: "./course-apps.html",
+    enabled: true,
+    tag: "Apps",
+    icon: "apps"
   },
   "工作後台": {
     href: "./admin.html",
