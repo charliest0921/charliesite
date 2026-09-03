@@ -137,6 +137,11 @@
       box-shadow: 0 0 24px rgba(0,245,212,0.14);
     }
 
+    .segment:disabled {
+      cursor: not-allowed;
+      opacity: 0.52;
+    }
+
     .teacher-tools {
       display: grid;
       grid-template-columns: minmax(250px, 0.9fr) minmax(260px, 1fr) minmax(190px, 0.72fr) auto;
@@ -522,6 +527,8 @@
     let userProfile = null;
     let accessAllowed = false;
     let currentConfig = defaultConfig;
+    let draftPrivacy = defaultConfig.privacy;
+    let draftDirection = defaultConfig.direction;
     let messages = [];
     let authors = new Map();
     let unsubscribeConfig = null;
@@ -563,14 +570,38 @@
       statusLabel.textContent = currentConfig.needsReset
         ? "已公布，需重置"
         : statusTextMap[currentConfig.status] || "未設定";
-      privacyLabel.textContent = privacyText[currentConfig.privacy] || "未設定";
-      directionLabel.textContent = directionText[currentConfig.direction] || "未設定";
+      if (canEditDraftSettings()) {
+        draftPrivacy = currentConfig.privacy;
+        draftDirection = currentConfig.direction;
+      }
+      privacyLabel.textContent = canEditDraftSettings()
+        ? `準備：${privacyText[draftPrivacy] || "未設定"}`
+        : privacyText[currentConfig.privacy] || "未設定";
+      directionLabel.textContent = canEditDraftSettings()
+        ? `準備：${directionText[draftDirection] || "未設定"}`
+        : directionText[currentConfig.direction] || "未設定";
+      updateDraftControls();
+    }
 
+    function canEditDraftSettings() {
+      return currentConfig.status !== "open" && currentConfig.needsReset !== true;
+    }
+
+    function updateDraftControls() {
+      const editable = canEditDraftSettings();
+      if (editable) {
+        privacyLabel.textContent = `準備：${privacyText[draftPrivacy] || "未設定"}`;
+        directionLabel.textContent = `準備：${directionText[draftDirection] || "未設定"}`;
+      }
       document.querySelectorAll("[data-privacy]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.privacy === currentConfig.privacy);
+        button.classList.toggle("active", button.dataset.privacy === draftPrivacy);
+        button.disabled = !editable;
+        button.title = editable ? "本輪開啟前可設定" : "留言開放或公布後不可變更，請重置後設定下一輪";
       });
       document.querySelectorAll("[data-direction]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.direction === currentConfig.direction);
+        button.classList.toggle("active", button.dataset.direction === draftDirection);
+        button.disabled = !editable;
+        button.title = editable ? "本輪開啟前可設定" : "留言開放或公布後不可變更，請重置後設定下一輪";
       });
     }
 
@@ -778,7 +809,12 @@
         setStatus("請先重置本次留言，再開放下一輪。");
         return;
       }
-      await updateConfig({ status: "open" });
+      await updateConfig({
+        status: "open",
+        privacy: draftPrivacy,
+        direction: draftDirection,
+        needsReset: false
+      });
     }
 
     async function closeMessages() {
@@ -800,6 +836,8 @@
       await updateConfig({
         status: "closed",
         needsReset: false,
+        privacy: draftPrivacy,
+        direction: draftDirection,
         round: Number(currentConfig.round || 1) + 1
       });
       setStatus("本次留言已重置。");
@@ -931,10 +969,24 @@
       document.getElementById("resetButton").addEventListener("click", resetRound);
       document.getElementById("backupButton").addEventListener("click", backupMessages);
       document.querySelectorAll("[data-privacy]").forEach((button) => {
-        button.addEventListener("click", () => updateConfig({ privacy: button.dataset.privacy }));
+        button.addEventListener("click", () => {
+          if (!canEditDraftSettings()) {
+            setStatus("留言開放後不可變更模式，請結束並重置後再設定下一輪。");
+            return;
+          }
+          draftPrivacy = button.dataset.privacy;
+          updateDraftControls();
+        });
       });
       document.querySelectorAll("[data-direction]").forEach((button) => {
-        button.addEventListener("click", () => updateConfig({ direction: button.dataset.direction }));
+        button.addEventListener("click", () => {
+          if (!canEditDraftSettings()) {
+            setStatus("留言開放後不可變更顯示方式，請結束並重置後再設定下一輪。");
+            return;
+          }
+          draftDirection = button.dataset.direction;
+          updateDraftControls();
+        });
       });
 
       onAuthStateChanged(auth, async (user) => {
