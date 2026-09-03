@@ -1,0 +1,998 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>留言系統 | Charlie 的班級網站</title>
+  <link rel="stylesheet" href="./class-console.css" />
+  <style>
+    .page {
+      width: min(1480px, calc(100% - 20px));
+      padding: 10px 0 14px;
+    }
+
+    .topbar {
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+
+    .brand h1 {
+      font-size: clamp(1.05rem, 2vw, 1.45rem);
+    }
+
+    .brand p {
+      display: none;
+    }
+
+    .mark {
+      width: 36px;
+      height: 36px;
+    }
+
+    .message-dashboard {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 8px;
+      min-height: calc(100vh - 118px);
+    }
+
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .status-chip {
+      min-height: 48px;
+      padding: 7px 10px;
+      border: 1px solid rgba(232,238,255,0.14);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .status-chip span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 850;
+    }
+
+    .status-chip strong {
+      color: #fff;
+      font-size: 0.98rem;
+    }
+
+    .login-card {
+      display: grid;
+      grid-template-columns: auto minmax(320px, 1fr) auto auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .login-form {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.7fr) auto;
+      align-items: end;
+      gap: 10px;
+    }
+
+    .login-card h2,
+    .login-card p,
+    .login-form .field,
+    .message-form .field {
+      margin-bottom: 0;
+    }
+
+    .login-card h2 {
+      margin: 0;
+      white-space: nowrap;
+      font-size: 1.02rem;
+    }
+
+    .login-card > .quiet {
+      display: none;
+    }
+
+    .user-badge {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      border: 1px solid rgba(0,245,212,0.2);
+      border-radius: var(--radius);
+      background: rgba(0,245,212,0.08);
+      color: #dffcff;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .segmented.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .segment {
+      min-height: 42px;
+      border: 1px solid rgba(232,238,255,0.16);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.07);
+      color: #dce7ff;
+      cursor: pointer;
+      font-weight: 850;
+    }
+
+    .segment.active {
+      border-color: rgba(0,245,212,0.42);
+      background: linear-gradient(135deg, rgba(0,245,212,0.2), rgba(53,167,255,0.12));
+      color: #fff;
+      box-shadow: 0 0 24px rgba(0,245,212,0.14);
+    }
+
+    .teacher-tools {
+      display: grid;
+      grid-template-columns: minmax(250px, 0.9fr) minmax(260px, 1fr) minmax(190px, 0.72fr) auto;
+      gap: 12px;
+      align-items: start;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(232,238,255,0.12);
+    }
+
+    .tool-block {
+      padding-top: 2px;
+    }
+
+    .tool-block h3 {
+      margin: 0 0 10px;
+      color: #fff;
+      font-size: 1.02rem;
+    }
+
+    .message-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 10px;
+      order: 4;
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      padding-top: 12px;
+      margin-top: 12px;
+      border-top: 1px solid rgba(232,238,255,0.14);
+      background:
+        linear-gradient(180deg, rgba(8,11,19,0), rgba(8,11,19,0.96) 18%),
+        rgba(8, 11, 19, 0.86);
+    }
+
+    .message-form textarea {
+      min-height: 54px;
+      max-height: 96px;
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .message-list {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-auto-rows: max(92px, calc((100% - 24px) / 4));
+      align-content: start;
+      gap: 8px;
+      order: 3;
+      flex: 1;
+      height: calc(100vh - 322px);
+      min-height: 0;
+      max-height: calc(100vh - 286px);
+      overflow: auto;
+      padding: 2px 6px 2px 0;
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,245,212,0.55) rgba(255,255,255,0.08);
+    }
+
+    .message-item {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid rgba(232,238,255,0.14);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .message-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: #dbe7ff;
+      font-size: 0.72rem;
+      font-weight: 850;
+      flex-wrap: wrap;
+    }
+
+    .message-content {
+      margin: 0;
+      color: #f5f8ff;
+      font-size: clamp(0.9rem, 1vw, 1.08rem);
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .quiet {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .board-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 228px);
+      padding: clamp(14px, 2vw, 20px);
+    }
+
+    .board-title {
+      margin: 5px 0 0;
+      font-size: clamp(1.5rem, 3vw, 2.8rem);
+    }
+
+    .board-count {
+      font-size: clamp(1.2rem, 2.4vw, 2rem);
+    }
+
+    .message-dashboard > aside.panel {
+      padding: 10px;
+      margin-bottom: 0;
+    }
+
+    .hero.compact-hero {
+      display: none;
+    }
+
+    .toolbar {
+      order: 1;
+      margin-bottom: 8px;
+    }
+
+    .board-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .scroll-button {
+      min-width: 48px;
+      min-height: 42px;
+      padding: 0 12px;
+      font-size: 1.05rem;
+    }
+
+    .scroll-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.38;
+    }
+    }
+
+    .empty {
+      order: 2;
+      flex: 1;
+      min-height: 340px;
+      font-size: clamp(1.2rem, 2.5vw, 2rem);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      .message-dashboard, .status-strip, .login-card, .login-form, .teacher-tools { grid-template-columns: 1fr; }
+      .message-dashboard {
+        min-height: auto;
+      }
+      .board-panel {
+        min-height: 70vh;
+      }
+      .message-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        height: 62vh;
+        max-height: 62vh;
+      }
+      .login-card > .quiet {
+        display: block;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .segmented, .segmented.two { grid-template-columns: 1fr; }
+      .message-form {
+        grid-template-columns: 1fr;
+      }
+      .message-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: minmax(118px, auto);
+      }
+    }
+
+    @media (min-width: 1500px) {
+      .message-list {
+        grid-auto-rows: minmax(120px, 1fr);
+      }
+
+      .message-content {
+        font-size: clamp(1rem, 0.9vw, 1.22rem);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="mark">C</span>
+        <span><h1>留言系統</h1><p>Public / Semi-anonymous / Anonymous</p></span>
+      </a>
+      <nav class="nav-actions" aria-label="頁面導覽">
+        <a class="ghost" href="./class-tools.html">班經小工具</a>
+        <a class="ghost" href="./index.html">回首頁</a>
+      </nav>
+    </header>
+
+    <section class="hero compact-hero">
+      <span>Class Message Board</span>
+      <h2>讓學生安心留言，也讓教師掌握討論節奏。</h2>
+      <p>教師可切換全公開、半匿名、全匿名，也能控制留言開放、公布、單向或雙向顯示，資料會寫入既有 Firebase Firestore。</p>
+    </section>
+
+    <section class="status-strip" aria-label="留言狀態">
+      <div class="status-chip cyan"><span>目前狀態</span><strong id="statusLabel">讀取中</strong></div>
+      <div class="status-chip amber"><span>匿名模式</span><strong id="privacyLabel">讀取中</strong></div>
+      <div class="status-chip rose"><span>顯示方式</span><strong id="directionLabel">讀取中</strong></div>
+    </section>
+
+    <section class="message-dashboard">
+      <aside class="panel">
+        <div class="login-card">
+          <h2>登入身分</h2>
+          <p class="quiet">請使用 Firebase Authentication 的電子信箱與密碼登入。教師帳號使用 <code>a776663@gmail.com</code>；學生姓名讀取舊 Firebase 的 <code>users</code> 資料表。</p>
+          <div class="user-badge hidden" id="userBadge"></div>
+          <form class="login-form" id="loginForm">
+            <label class="field">
+              電子信箱
+              <input name="email" type="email" autocomplete="email" placeholder="student@example.com" required />
+            </label>
+            <label class="field">
+              密碼
+              <input name="password" type="password" autocomplete="current-password" placeholder="輸入密碼" required />
+            </label>
+            <div class="actions">
+              <button class="button primary" id="loginButton" type="submit">登入</button>
+            </div>
+          </form>
+          <div class="actions">
+            <button class="ghost hidden" id="logoutButton" type="button">登出</button>
+          </div>
+          <p class="status" id="statusText"></p>
+        </div>
+
+        <div class="teacher-tools hidden" id="teacherPanel">
+          <div class="tool-block">
+            <h3>留言流程</h3>
+            <div class="actions">
+              <button class="button primary" id="openButton" type="button">開放留言</button>
+              <button class="button" id="closeButton" type="button">結束了，公布留言</button>
+              <button class="danger" id="resetButton" type="button">重置本次留言</button>
+            </div>
+          </div>
+
+          <div class="tool-block">
+            <h3>匿名模式</h3>
+            <div class="segmented" id="privacyControl">
+              <button class="segment" data-privacy="public" type="button">全公開</button>
+              <button class="segment" data-privacy="semi" type="button">半匿名</button>
+              <button class="segment" data-privacy="anonymous" type="button">全匿名</button>
+            </div>
+          </div>
+
+          <div class="tool-block">
+            <h3>顯示方式</h3>
+            <div class="segmented two" id="directionControl">
+              <button class="segment" data-direction="oneWay" type="button">單向</button>
+              <button class="segment" data-direction="twoWay" type="button">雙向</button>
+            </div>
+          </div>
+
+          <div class="tool-block">
+            <h3>資料備份</h3>
+            <div class="actions">
+              <button class="button" id="backupButton" type="button">備份此次留言</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel board-panel">
+        <form class="message-form hidden" id="messageForm">
+          <label class="field">
+            留言內容
+            <textarea name="content" maxlength="1200" placeholder="輸入想讓老師或全班看到的留言..." required></textarea>
+          </label>
+          <div class="actions">
+            <button class="button primary" type="submit">送出留言</button>
+          </div>
+        </form>
+
+        <div class="empty" id="waitingBox">請先登入，系統會依帳號權限顯示可使用功能。</div>
+
+        <div class="toolbar hidden" id="listToolbar">
+          <div>
+            <span class="section-kicker">Messages</span>
+            <h2 class="board-title">本次留言</h2>
+          </div>
+          <div class="board-actions">
+            <strong class="board-count" id="messageCount">0 則</strong>
+            <button class="ghost scroll-button" id="scrollUpButton" type="button" title="往上捲動">▲</button>
+            <button class="ghost scroll-button" id="scrollDownButton" type="button" title="往下捲動">▼</button>
+          </div>
+        </div>
+        <div class="message-list hidden" id="messageList"></div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import {
+      addDoc,
+      collection,
+      doc,
+      getDoc,
+      getDocs,
+      getFirestore,
+      onSnapshot,
+      serverTimestamp,
+      setDoc,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    import { firebaseConfig, hasFirebaseConfig } from "./firebase-config.js";
+
+    const TEACHER_EMAIL = "a776663@gmail.com";
+    const SYSTEM_ID = "main";
+    const defaultConfig = {
+      status: "closed",
+      privacy: "semi",
+      direction: "twoWay",
+      round: 1,
+      needsReset: false
+    };
+    const privacyText = {
+      public: "全公開",
+      semi: "半匿名",
+      anonymous: "全匿名"
+    };
+    const directionText = {
+      oneWay: "單向",
+      twoWay: "雙向"
+    };
+    const statusTextMap = {
+      open: "開放留言",
+      closed: "已結束並公布"
+    };
+
+    const loginForm = document.getElementById("loginForm");
+    const loginButton = document.getElementById("loginButton");
+    const logoutButton = document.getElementById("logoutButton");
+    const userBadge = document.getElementById("userBadge");
+    const teacherPanel = document.getElementById("teacherPanel");
+    const messageForm = document.getElementById("messageForm");
+    const waitingBox = document.getElementById("waitingBox");
+    const listToolbar = document.getElementById("listToolbar");
+    const messageList = document.getElementById("messageList");
+    const messageCount = document.getElementById("messageCount");
+    const scrollUpButton = document.getElementById("scrollUpButton");
+    const scrollDownButton = document.getElementById("scrollDownButton");
+    const statusLine = document.getElementById("statusText");
+    const statusLabel = document.getElementById("statusLabel");
+    const privacyLabel = document.getElementById("privacyLabel");
+    const directionLabel = document.getElementById("directionLabel");
+
+    let app;
+    let db;
+    let auth;
+    let currentUser = null;
+    let isTeacher = false;
+    let userProfile = null;
+    let accessAllowed = false;
+    let currentConfig = defaultConfig;
+    let messages = [];
+    let authors = new Map();
+    let unsubscribeConfig = null;
+    let unsubscribeMessages = null;
+    let unsubscribeAuthors = null;
+
+    function setStatus(message) {
+      statusLine.textContent = message;
+      if (message) {
+        setTimeout(() => {
+          if (statusLine.textContent === message) statusLine.textContent = "";
+        }, 2600);
+      }
+    }
+
+    function configRef() {
+      return doc(db, "wordcloud_settings", SYSTEM_ID);
+    }
+
+    function messagesRef() {
+      return collection(db, "wordcloud_msgs");
+    }
+
+    function authorsRef() {
+      return collection(db, "wordcloud_msg_authors");
+    }
+
+    function displayName(user) {
+      if (userProfile?.name) return userProfile.name;
+      if (userProfile?.displayName) return userProfile.displayName;
+      return user.email || "未命名使用者";
+    }
+
+    function canStudentViewResults() {
+      return currentConfig.direction === "twoWay";
+    }
+
+    function updateLabels() {
+      statusLabel.textContent = currentConfig.needsReset
+        ? "已公布，需重置"
+        : statusTextMap[currentConfig.status] || "未設定";
+      privacyLabel.textContent = privacyText[currentConfig.privacy] || "未設定";
+      directionLabel.textContent = directionText[currentConfig.direction] || "未設定";
+
+      document.querySelectorAll("[data-privacy]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.privacy === currentConfig.privacy);
+      });
+      document.querySelectorAll("[data-direction]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.direction === currentConfig.direction);
+      });
+    }
+
+    function visibleAuthor(message) {
+      if (currentConfig.privacy === "public") {
+        return message.authorDisplayName || message.name || message.userName || "未命名";
+      }
+      if (currentConfig.privacy === "semi" && isTeacher) {
+        const author = authors.get(message.id);
+        return author?.displayName || author?.name || author?.email || message.name || message.userName || "學生";
+      }
+      return "匿名留言";
+    }
+
+    function renderMessages() {
+      const mayView = accessAllowed && (isTeacher || canStudentViewResults());
+      listToolbar.classList.toggle("hidden", !mayView);
+      messageList.classList.toggle("hidden", !mayView);
+
+      if (!currentUser) {
+        waitingBox.classList.remove("hidden");
+        waitingBox.textContent = "請先登入，系統會依帳號權限顯示可使用功能。";
+        return;
+      }
+
+      if (!accessAllowed) {
+        waitingBox.classList.remove("hidden");
+        waitingBox.textContent = "這個帳號的 UID 尚未建立在 Firestore users。請確認文件 ID 是否等於 Authentication 的 UID。";
+        return;
+      }
+
+      if (!mayView) {
+        waitingBox.classList.remove("hidden");
+        waitingBox.textContent = "目前是單向模式，留言結果只顯示在教師帳號。";
+        return;
+      }
+
+      waitingBox.classList.toggle("hidden", messages.length > 0);
+      waitingBox.textContent = "目前還沒有留言。";
+      messageCount.textContent = `${messages.length} 則`;
+      messageList.innerHTML = messages.map((message) => {
+        const time = message.createdAt?.toDate
+          ? new Intl.DateTimeFormat("zh-Hant-TW", { dateStyle: "short", timeStyle: "short" }).format(message.createdAt.toDate())
+          : "剛剛";
+        return `
+          <article class="message-item">
+            <div class="message-meta">
+              <span>${visibleAuthor(message)}</span>
+              <span>${time}</span>
+            </div>
+            <p class="message-content">${escapeHtml(message.content || message.text || message.message || "")}</p>
+          </article>
+        `;
+      }).join("");
+      updateScrollButtons();
+    }
+
+    function scrollMessages(direction) {
+      const distance = Math.max(messageList.clientHeight * 0.82, 180);
+      messageList.scrollBy({ top: direction * distance, behavior: "smooth" });
+      setTimeout(updateScrollButtons, 260);
+    }
+
+    function updateScrollButtons() {
+      const canScroll = messageList.scrollHeight > messageList.clientHeight + 4;
+      const atTop = messageList.scrollTop <= 4;
+      const atBottom = messageList.scrollTop + messageList.clientHeight >= messageList.scrollHeight - 4;
+      scrollUpButton.disabled = !canScroll || atTop;
+      scrollDownButton.disabled = !canScroll || atBottom;
+    }
+
+    function messageMillis(message) {
+      const value = message.createdAt || message.timestamp || message.time;
+      if (value?.toMillis) return value.toMillis();
+      if (value?.toDate) return value.toDate().getTime();
+      if (typeof value === "number") return value;
+      const parsed = Date.parse(String(value || ""));
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    function renderAccess() {
+      loginForm.classList.toggle("hidden", Boolean(currentUser));
+      logoutButton.classList.toggle("hidden", !currentUser);
+      teacherPanel.classList.toggle("hidden", !isTeacher);
+
+      if (currentUser) {
+        userBadge.classList.remove("hidden");
+        userBadge.innerHTML = `
+          <span>${isTeacher ? "教師帳號" : accessAllowed ? "學生帳號" : "未登錄帳號"}</span>
+          <span>${escapeHtml(currentUser.email || displayName(currentUser))}</span>
+          <span>UID：${escapeHtml(currentUser.uid)}</span>
+          ${userProfile?.name ? `<span>${escapeHtml(userProfile.name)}</span>` : ""}
+        `;
+      } else {
+        userBadge.classList.add("hidden");
+      }
+
+      const canPost = Boolean(currentUser) && accessAllowed && currentConfig.status === "open";
+      messageForm.classList.toggle("hidden", !canPost);
+      renderMessages();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function ensureConfig() {
+      const snap = await getDoc(configRef());
+      if (!snap.exists() && isTeacher) {
+        await setDoc(configRef(), {
+          ...defaultConfig,
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
+
+    function isTeacherUser(user) {
+      return String(user.email || "").toLowerCase() === TEACHER_EMAIL;
+    }
+
+    async function loadUserProfile(user) {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        return {
+          uid: user.uid,
+          mail: user.email || "",
+          name: "",
+          exists: false
+        };
+      }
+
+      const profile = userSnap.data();
+      return {
+        uid: user.uid,
+        mail: profile.mail || profile.email || user.email || "",
+        name: profile.name || user.email || "未命名使用者",
+        exists: true,
+        ...profile
+      };
+    }
+
+    function subscribeConfig() {
+      if (unsubscribeConfig) unsubscribeConfig();
+      unsubscribeConfig = onSnapshot(configRef(), (snap) => {
+        currentConfig = snap.exists() ? { ...defaultConfig, ...snap.data() } : defaultConfig;
+        updateLabels();
+        syncMessageSubscription();
+        renderAccess();
+      });
+    }
+
+    function subscribeMessages() {
+      if (!currentUser || (!isTeacher && !canStudentViewResults())) return;
+      if (unsubscribeMessages) unsubscribeMessages();
+      unsubscribeMessages = onSnapshot(messagesRef(), (snap) => {
+        messages = snap.docs
+          .map((item) => ({ id: item.id, ...item.data() }))
+          .sort((a, b) => messageMillis(a) - messageMillis(b));
+        renderMessages();
+      }, () => {
+        messages = [];
+        unsubscribeMessages = null;
+        renderMessages();
+      });
+    }
+
+    function syncMessageSubscription() {
+      if (!currentUser || !accessAllowed) return;
+      const shouldRead = isTeacher || canStudentViewResults();
+      if (shouldRead && !unsubscribeMessages) {
+        subscribeMessages();
+      }
+      if (!shouldRead && unsubscribeMessages) {
+        unsubscribeMessages();
+        unsubscribeMessages = null;
+        messages = [];
+      }
+    }
+
+    function subscribeAuthors() {
+      if (unsubscribeAuthors) unsubscribeAuthors();
+      unsubscribeAuthors = null;
+      authors = new Map();
+      if (!isTeacher) return;
+
+      unsubscribeAuthors = onSnapshot(authorsRef(), (snap) => {
+        authors = new Map(snap.docs.map((item) => [item.id, item.data()]));
+        renderMessages();
+      });
+    }
+
+    async function updateConfig(patch) {
+      await setDoc(configRef(), { ...currentConfig, ...patch, updatedAt: serverTimestamp() }, { merge: true });
+      setStatus("設定已更新。");
+    }
+
+    async function openMessages() {
+      if (currentConfig.needsReset) {
+        setStatus("請先重置本次留言，再開放下一輪。");
+        return;
+      }
+      await updateConfig({ status: "open" });
+    }
+
+    async function closeMessages() {
+      await updateConfig({ status: "closed", needsReset: true });
+    }
+
+    async function deleteCollectionItems(ref) {
+      const snap = await getDocs(ref);
+      const batch = writeBatch(db);
+      snap.docs.forEach((item) => batch.delete(item.ref));
+      if (snap.size > 0) await batch.commit();
+    }
+
+    async function resetRound() {
+      const ok = confirm("確定重置本次留言嗎？目前留言與作者備份資料會從 Firebase 刪除。");
+      if (!ok) return;
+      await deleteCollectionItems(messagesRef());
+      await deleteCollectionItems(authorsRef());
+      await updateConfig({
+        status: "closed",
+        needsReset: false,
+        round: Number(currentConfig.round || 1) + 1
+      });
+      setStatus("本次留言已重置。");
+    }
+
+    async function submitMessage(event) {
+      event.preventDefault();
+      if (!currentUser || !accessAllowed || currentConfig.status !== "open") return;
+      const content = messageForm.elements.content.value.trim();
+      if (!content) return;
+
+      const name = currentConfig.privacy === "public" ? displayName(currentUser) : "匿名";
+      const messageDoc = await addDoc(messagesRef(), {
+        content,
+        authorDisplayName: name,
+        privacy: currentConfig.privacy,
+        round: currentConfig.round || 1,
+        createdAt: serverTimestamp()
+      });
+
+      await setDoc(doc(db, "wordcloud_msg_authors", messageDoc.id), {
+        uid: currentUser.uid,
+        displayName: displayName(currentUser),
+        name: displayName(currentUser),
+        email: currentUser.email || "",
+        role: isTeacher ? "teacher" : "student",
+        privacy: currentConfig.privacy,
+        round: currentConfig.round || 1,
+        createdAt: serverTimestamp()
+      });
+
+      messageForm.reset();
+      setStatus("留言已送出。");
+    }
+
+    async function backupMessages() {
+      const messageSnap = await getDocs(messagesRef());
+      const authorSnap = await getDocs(authorsRef());
+      const authorMap = new Map(authorSnap.docs.map((item) => [item.id, item.data()]));
+      const rows = messageSnap.docs
+        .map((item) => ({ id: item.id, ...item.data() }))
+        .sort((a, b) => messageMillis(a) - messageMillis(b))
+        .map((message, index) => {
+        const author = authorMap.get(message.id);
+        const createdAtValue = message.createdAt || message.timestamp || message.time;
+        const createdAt = createdAtValue?.toDate ? createdAtValue.toDate().toISOString() : String(createdAtValue || "");
+        return {
+          index: index + 1,
+          id: message.id,
+          createdAt,
+          privacy: privacyText[message.privacy] || message.privacy || "",
+          content: message.content || message.text || message.message || "",
+          authorName: author?.displayName || author?.name || message.authorDisplayName || message.name || message.userName || "未記錄",
+          authorEmail: author?.email || message.email || "",
+          authorUid: author?.uid || message.uid || message.userId || ""
+        };
+      });
+
+      const text = rows.map((row) => [
+        `序號：${row.index}`,
+        `留言ID：${row.id}`,
+        `時間：${row.createdAt}`,
+        `匿名模式：${row.privacy}`,
+        `留言者姓名：${row.authorName}`,
+        `留言者Email：${row.authorEmail}`,
+        `留言者UID：${row.authorUid}`,
+        `留言內容：${row.content}`
+      ].join("\n")).join("\n\n---\n\n");
+
+      const blob = new Blob(["\ufeff", text || "本次沒有留言。"], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const stamp = new Intl.DateTimeFormat("sv-SE", {
+        timeZone: "Asia/Taipei",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(new Date()).replaceAll(" ", "-").replaceAll(":", "");
+      link.href = url;
+      link.download = `class-messages-${stamp}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setStatus("備份檔已下載。");
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replaceAll('"', '""')}"`;
+    }
+
+    if (!hasFirebaseConfig()) {
+      waitingBox.textContent = "Firebase 尚未設定，請先確認 firebase-config.js。";
+      loginButton.disabled = true;
+      updateLabels();
+    } else {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      updateLabels();
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const email = loginForm.elements.email.value.trim();
+        const password = loginForm.elements.password.value;
+        if (!email || !password) return;
+
+        try {
+          loginButton.disabled = true;
+          setStatus("正在登入...");
+          await signInWithEmailAndPassword(auth, email, password);
+          loginForm.reset();
+          setStatus("登入成功。");
+        } catch (error) {
+          console.error(error);
+          setStatus(loginErrorMessage(error));
+        } finally {
+          loginButton.disabled = false;
+        }
+      });
+
+      logoutButton.addEventListener("click", () => signOut(auth));
+      messageForm.addEventListener("submit", submitMessage);
+      messageList.addEventListener("scroll", updateScrollButtons);
+      scrollUpButton.addEventListener("click", () => scrollMessages(-1));
+      scrollDownButton.addEventListener("click", () => scrollMessages(1));
+      document.getElementById("openButton").addEventListener("click", openMessages);
+      document.getElementById("closeButton").addEventListener("click", closeMessages);
+      document.getElementById("resetButton").addEventListener("click", resetRound);
+      document.getElementById("backupButton").addEventListener("click", backupMessages);
+      document.querySelectorAll("[data-privacy]").forEach((button) => {
+        button.addEventListener("click", () => updateConfig({ privacy: button.dataset.privacy }));
+      });
+      document.querySelectorAll("[data-direction]").forEach((button) => {
+        button.addEventListener("click", () => updateConfig({ direction: button.dataset.direction }));
+      });
+
+      onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        isTeacher = false;
+        userProfile = null;
+        accessAllowed = false;
+        if (!user) {
+          messages = [];
+          authors = new Map();
+          if (unsubscribeMessages) unsubscribeMessages();
+          if (unsubscribeAuthors) unsubscribeAuthors();
+          if (unsubscribeConfig) unsubscribeConfig();
+          unsubscribeMessages = null;
+          unsubscribeAuthors = null;
+          unsubscribeConfig = null;
+          renderAccess();
+          return;
+        }
+
+        try {
+          userProfile = await loadUserProfile(user);
+          isTeacher = isTeacherUser(user);
+          accessAllowed = isTeacher || userProfile?.exists === true;
+          if (!accessAllowed) {
+            setStatus("這個帳號的 UID 尚未建立在 Firestore users。請確認文件 ID 是否等於 Authentication 的 UID。");
+            renderAccess();
+            return;
+          }
+          await ensureConfig();
+          subscribeConfig();
+          subscribeAuthors();
+          renderAccess();
+        } catch (error) {
+          console.error(error);
+          setStatus("權限或資料讀取失敗，請確認 Firestore Rules 已更新。");
+          renderAccess();
+        }
+      });
+
+    }
+
+    function loginErrorMessage(error) {
+      const code = error?.code || "";
+      if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
+        return "登入失敗：信箱或密碼不正確。";
+      }
+      if (code === "auth/too-many-requests") {
+        return "登入失敗：嘗試次數太多，請稍後再試。";
+      }
+      if (code === "auth/invalid-email") {
+        return "登入失敗：電子信箱格式不正確。";
+      }
+      if (code === "auth/network-request-failed") {
+        return "登入失敗：網路連線異常。";
+      }
+      return `登入失敗：${error?.message || "請確認 Firebase Email/Password 登入已啟用。"}`;
+    }
+  </script>
+</body>
+</html>

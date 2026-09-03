@@ -59,12 +59,12 @@ const defaultWidgets = [
   },
   {
     title: "互動區",
-    description: "未來可放留言板、回饋表單、班級投票與作品交流。",
-    href: "interactive.html",
+    description: "公開、半匿名、全匿名留言，搭配 Firebase 帳號權限與教師備份。",
+    href: "comments.html",
     color: "rose",
     tag: "Community",
     icon: "message",
-    enabled: false,
+    enabled: true,
     order: 5
   },
   {
@@ -106,6 +106,12 @@ const fixedWidgetLinks = {
     enabled: true,
     tag: "Apps",
     icon: "apps"
+  },
+  "互動區": {
+    href: "./comments.html",
+    enabled: true,
+    tag: "Community",
+    icon: "message"
   },
   "工作後台": {
     href: "./admin.html",

@@ -61,7 +61,7 @@
     .hero span { color: var(--cyan); font-weight: 900; text-shadow: 0 0 18px rgba(0,245,212,0.42); }
     .hero h2 { max-width: 850px; margin: 10px 0 12px; font-size: clamp(2rem, 5vw, 4.4rem); line-height: 0.96; text-wrap: balance; }
     .hero p { max-width: 760px; margin: 0; color: #bcc7d9; line-height: 1.75; font-size: 1.08rem; }
-    .grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
     .tool-card { position: relative; min-height: 240px; padding: 18px; overflow: hidden; transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
     .tool-card:hover { transform: translateY(-4px); border-color: currentColor; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 0 32px color-mix(in srgb, currentColor 28%, transparent), 0 26px 58px rgba(0,0,0,0.48); }
     .tool-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 20% 0%, currentColor, transparent 22rem); opacity: 0.12; }
@@ -87,7 +87,7 @@
     <section class="hero">
       <span>Teacher Console</span>
       <h2>把教室裡最常用的節奏工具，集中在一個入口。</h2>
-      <p>鐘、抽籤、分組、作業點交、外務登記都已先做成獨立頁面，方便投影、平板或電腦直接使用。</p>
+      <p>鐘、抽籤、分組、作業點交、外務登記與留言系統都已先做成獨立頁面，方便投影、平板或電腦直接使用。</p>
     </section>
 
     <section class="grid" aria-label="班經工具列表">
@@ -96,6 +96,7 @@
       <a class="tool-card green" href="./grouping.html"><strong>分組系統</strong><p>名單分組、依組數或人數分配、鎖定與複製結果。</p><span>開啟工具</span></a>
       <a class="tool-card rose" href="./homework-check.html"><strong>作業點交</strong><p>紅黃綠狀態、全班快速切換、輸出提醒文字。</p><span>開啟工具</span></a>
       <a class="tool-card violet" href="./errands.html"><strong>外務登記</strong><p>選外務、選座號、登記離席狀態與返回時間。</p><span>開啟工具</span></a>
+      <a class="tool-card cyan" href="./comments.html"><strong>留言系統</strong><p>公開、半匿名、全匿名留言，搭配 Firebase 帳號權限與教師備份。</p><span>開啟工具</span></a>
     </section>
   </main>
 </body>

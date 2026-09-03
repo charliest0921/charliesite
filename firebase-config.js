@@ -1,13 +1,14 @@
 // Paste your Firebase web app config here after creating the Firebase project.
 // Firebase Console > Project settings > Your apps > Web app > SDK setup and configuration > Config
 export const firebaseConfig = {
-  apiKey: "AIzaSyDQmVxYKZEKs-NGm67J2Dumax4Ub0fzvFY",
-  authDomain: "charliesite-ae112.firebaseapp.com",
-  projectId: "charliesite-ae112",
-  storageBucket: "charliesite-ae112.firebasestorage.app",
-  messagingSenderId: "420070493240",
-  appId: "1:420070493240:web:93c9d953c4924f78da2acd",
-  measurementId: "G-Z31BV396CB"
+  apiKey: "AIzaSyAMWydxNTMsPxENrECTo6VeyS7YIwbLjZU",
+  authDomain: "nameless-16961.firebaseapp.com",
+  databaseURL: "https://nameless-16961-default-rtdb.firebaseio.com",
+  projectId: "nameless-16961",
+  storageBucket: "nameless-16961.firebasestorage.app",
+  messagingSenderId: "49208226272",
+  appId: "1:49208226272:web:da2c190a9d97f003f8fb85",
+  measurementId: "G-QR1SDBTBVN"
 };
 
 export function hasFirebaseConfig() {
