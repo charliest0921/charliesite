@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isTeacher() {
+      return signedIn() && request.auth.token.email == "a776663@gmail.com";
+    }
+
+    match /card_inventory/{cardId} {
+      allow read: if true;
+      allow create, update, delete: if isTeacher();
+    }
+
+    match /student_card_records/{studentId} {
+      allow read: if true;
+      allow create, update, delete: if isTeacher();
+    }
+
+    match /card_draw_logs/{logId} {
+      allow read, create, update, delete: if isTeacher();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

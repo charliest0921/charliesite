@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>目前卡片狀態區 | Charlie 的班級網站</title>
+  <style>
+    :root {
+      --bg: #05070d;
+      --ink: #f3f7ff;
+      --muted: #a9b4c7;
+      --line: rgba(232, 238, 255, 0.16);
+      --cyan: #00f5d4;
+      --blue: #35a7ff;
+      --green: #b8ff33;
+      --amber: #ffb000;
+      --rose: #ff2e88;
+      --violet: #a855f7;
+      --radius: 8px;
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 16% 0%, rgba(0, 245, 212, 0.2), transparent 24rem),
+        radial-gradient(circle at 88% 8%, rgba(255, 46, 136, 0.18), transparent 28rem),
+        linear-gradient(135deg, #03040a 0%, #080b12 45%, #11151f 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 82%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+
+    .page {
+      width: min(1160px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 26px 0 46px;
+    }
+
+    .glass, .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.04)),
+        rgba(8, 11, 19, 0.62);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 24px 70px rgba(0, 0, 0, 0.42);
+      backdrop-filter: blur(24px) saturate(165%);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--cyan), var(--blue), var(--rose));
+      color: #02040a;
+      font-weight: 950;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    .brand h1 { margin: 0; font-size: clamp(1.2rem, 2.6vw, 1.7rem); line-height: 1.15; }
+    .brand p { margin: 3px 0 0; color: var(--muted); }
+
+    .nav, .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 13px;
+      border: 1px solid rgba(232, 238, 255, 0.18);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .button.primary {
+      border-color: rgba(0, 245, 212, 0.42);
+      background: linear-gradient(145deg, rgba(0, 245, 212, 0.28), rgba(53, 167, 255, 0.14));
+      box-shadow: 0 0 22px rgba(0, 245, 212, 0.15);
+    }
+
+    .button.warn {
+      border-color: rgba(255, 176, 0, 0.42);
+      color: #ffe6a6;
+    }
+
+    .button:disabled, input:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .hidden { display: none !important; }
+
+    .hero {
+      padding: clamp(22px, 4vw, 40px);
+      margin-bottom: 16px;
+    }
+
+    .hero span {
+      color: var(--cyan);
+      font-weight: 950;
+      text-shadow: 0 0 18px rgba(0, 245, 212, 0.42);
+    }
+
+    .hero h2 {
+      max-width: 860px;
+      margin: 10px 0 12px;
+      font-size: clamp(2.1rem, 5vw, 4.8rem);
+      line-height: 0.96;
+      text-wrap: balance;
+    }
+
+    .quiet { color: var(--muted); line-height: 1.7; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .status {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      color: #c8d5eb;
+      font-weight: 850;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      min-height: 350px;
+      padding: 12px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 12px;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .card.upgrade-ready {
+      border-color: rgba(184, 255, 51, 0.72);
+      animation: readyGlow 1.2s ease-in-out infinite alternate;
+    }
+
+    .card.upgraded {
+      animation: upgradedFlash 820ms ease both;
+    }
+
+    .card[data-rarity="UR"] { border-color: rgba(255, 46, 136, 0.42); }
+    .card[data-rarity="SSR"] { border-color: rgba(255, 176, 0, 0.34); }
+    .card[data-rarity="SR"] { border-color: rgba(0, 245, 212, 0.34); }
+
+    .art {
+      display: grid;
+      place-items: center;
+      min-height: 225px;
+      border: 1px solid rgba(232, 238, 255, 0.14);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(0, 245, 212, 0.12), rgba(255, 46, 136, 0.1)),
+        rgba(255, 255, 255, 0.045);
+      overflow: hidden;
+    }
+
+    .art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .art.has-image img { display: block; }
+    .art.has-image .placeholder { display: none; }
+
+    .placeholder {
+      display: grid;
+      place-items: center;
+      width: 70%;
+      aspect-ratio: 1;
+      border: 1px dashed rgba(232, 238, 255, 0.22);
+      border-radius: var(--radius);
+      color: rgba(243, 247, 255, 0.84);
+      font-size: clamp(3.5rem, 12vw, 6rem);
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .meta {
+      display: grid;
+      gap: 10px;
+    }
+
+    .meta-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .meta h3 { margin: 0; font-size: 1.45rem; }
+    .chip {
+      display: inline-grid;
+      place-items: center;
+      min-height: 30px;
+      padding: 0 9px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(232, 238, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: 950;
+    }
+
+    .count-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .count-row input {
+      width: 100%;
+      min-height: 38px;
+      padding: 7px 9px;
+      border: 1px solid rgba(232, 238, 255, 0.16);
+      border-radius: var(--radius);
+      background: rgba(2, 6, 23, 0.56);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .count-big {
+      font-size: 2.2rem;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .import-panel {
+      margin-top: 16px;
+      padding: 14px;
+    }
+
+    .import-panel input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(232, 238, 255, 0.16);
+      border-radius: var(--radius);
+      background: rgba(2, 6, 23, 0.56);
+      color: var(--ink);
+    }
+
+    .student-panel {
+      margin-top: 16px;
+      padding: 14px;
+    }
+
+    .student-table-wrap {
+      overflow: auto;
+      border: 1px solid rgba(232, 238, 255, 0.14);
+      border-radius: var(--radius);
+      background: rgba(2, 6, 23, 0.34);
+    }
+
+    .student-table {
+      width: 100%;
+      min-width: 920px;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    .student-table th,
+    .student-table td {
+      padding: 9px 8px;
+      border-bottom: 1px solid rgba(232, 238, 255, 0.1);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .student-table th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: rgba(8, 11, 19, 0.96);
+      color: #eaf2ff;
+      font-weight: 950;
+    }
+
+    .student-table td:first-child,
+    .student-table th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: rgba(8, 11, 19, 0.96);
+      font-weight: 950;
+    }
+
+    .student-table input {
+      width: 58px;
+      min-height: 34px;
+      padding: 5px;
+      text-align: center;
+      border: 1px solid rgba(232, 238, 255, 0.16);
+      border-radius: 6px;
+      background: rgba(2, 6, 23, 0.56);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .upgrade-cell {
+      animation: cellGlow 1s ease-in-out infinite alternate;
+      color: #efffd7;
+      font-weight: 950;
+    }
+
+    @keyframes readyGlow {
+      from { box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 24px rgba(184, 255, 51, 0.2); }
+      to { box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 0 52px rgba(184, 255, 51, 0.42); }
+    }
+
+    @keyframes upgradedFlash {
+      0% { transform: scale(1); filter: brightness(1); }
+      35% { transform: scale(1.04); filter: brightness(1.9); box-shadow: 0 0 80px rgba(255, 255, 255, 0.7); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    @keyframes cellGlow {
+      from { background: rgba(184, 255, 51, 0.12); box-shadow: inset 0 0 0 rgba(184, 255, 51, 0); }
+      to { background: rgba(184, 255, 51, 0.28); box-shadow: inset 0 0 24px rgba(184, 255, 51, 0.22); }
+    }
+
+    @media (max-width: 1020px) {
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar { grid-template-columns: 1fr; }
+      .actions .button { flex: 1 1 150px; }
+    }
+
+    @media (max-width: 540px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .nav, .nav .button { width: 100%; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar glass">
+      <a class="brand" href="./index.html">
+        <span class="mark">C</span>
+        <span><h1>目前卡片狀態區</h1><p>Class card inventory</p></span>
+      </a>
+      <nav class="nav">
+        <a class="button" href="./card-draw.html">抽卡區</a>
+        <a class="button" href="./class-tools.html">工具入口</a>
+        <button class="button primary" id="loginButton" type="button">教師登入編輯</button>
+        <button class="button hidden" id="logoutButton" type="button">登出</button>
+      </nav>
+    </header>
+
+    <section class="hero glass">
+      <span>Live Inventory</span>
+      <h2>班級卡片目前狀態。</h2>
+      <p class="quiet">學生可直接查看目前卡片數量；只有教師 Gmail 登入後能匯入 CSV、手動編輯數量或執行升級。</p>
+    </section>
+
+    <section class="toolbar glass">
+      <div class="status" id="status">正在讀取卡片狀態...</div>
+      <div class="actions">
+        <button class="button warn hidden" id="upgradeHintButton" type="button">升級提醒按鈕</button>
+        <button class="button primary hidden" id="upgradeButton" type="button">確認升級發光卡片</button>
+        <button class="button hidden" id="seedButton" type="button">匯入0912備份</button>
+      </div>
+    </section>
+
+    <section class="grid" id="cardGrid" aria-label="目前卡片"></section>
+
+    <section class="student-panel glass">
+      <h2>學生卡片明細</h2>
+      <p class="quiet">每位學生的目前卡片數量會存到 Firebase。教師登入後可直接在表格中修正數量。</p>
+      <div class="student-table-wrap" id="studentTableWrap"></div>
+    </section>
+
+    <section class="import-panel glass hidden" id="editPanel">
+      <h2>教師編輯</h2>
+      <p class="quiet">可直接匯入舊格式 CSV：<code>學生編號</code>、<code>12號R卡</code> 到 <code>1號UR卡</code>。匯入後會寫入 Firebase 並重算全班總數。</p>
+      <input id="csvInput" type="file" accept=".csv,text/csv" />
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signInWithPopup,
+      signInWithRedirect,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import {
+      collection,
+      doc,
+      getFirestore,
+      increment,
+      onSnapshot,
+      serverTimestamp,
+      setDoc,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    import { cardFirebaseConfig, hasCardFirebaseConfig } from "./card-firebase-config.js";
+    import { cardSeed0912 } from "./card-seed-0912.js";
+
+    const TEACHER_EMAIL = "a776663@gmail.com";
+    const catalog = [
+      { id: "1", rarity: "UR" }, { id: "2", rarity: "UR" }, { id: "3", rarity: "UR" },
+      { id: "4", rarity: "SSR" }, { id: "5", rarity: "SSR" }, { id: "6", rarity: "SSR" },
+      { id: "7", rarity: "SR" }, { id: "8", rarity: "SR" }, { id: "9", rarity: "SR" },
+      { id: "10", rarity: "R" }, { id: "11", rarity: "R" }, { id: "12", rarity: "R" }
+    ].map((card) => ({ ...card, name: `${card.id}${card.rarity}`, image: `./class-console-files/cards/${card.id}.jpg` }));
+    const upgradeMap = new Map([
+      ["12", "9"], ["11", "8"], ["10", "7"],
+      ["9", "6"], ["8", "5"], ["7", "4"],
+      ["6", "3"], ["5", "2"], ["4", "1"]
+    ]);
+
+    const $ = (id) => document.getElementById(id);
+    const grid = $("cardGrid");
+    const studentTableWrap = $("studentTableWrap");
+    const statusBox = $("status");
+    const loginButton = $("loginButton");
+    const logoutButton = $("logoutButton");
+    const editPanel = $("editPanel");
+    const upgradeHintButton = $("upgradeHintButton");
+    const upgradeButton = $("upgradeButton");
+    const seedButton = $("seedButton");
+    const csvInput = $("csvInput");
+    let db;
+    let auth;
+    let cards = new Map();
+    let students = new Map();
+    let teacher = false;
+    let highlighted = false;
+
+    function isTeacher(user) {
+      return (user?.email || "").toLowerCase() === TEACHER_EMAIL;
+    }
+
+    function setStatus(message) {
+      statusBox.textContent = message;
+    }
+
+    function mergedCards() {
+      const totals = aggregateStudentCounts();
+      if (students.size > 0) {
+        return catalog.map((card) => ({ ...card, count: totals[card.id] || 0 }));
+      }
+      return catalog.map((card) => ({ ...card, count: 0, ...(cards.get(card.id) || {}) }));
+    }
+
+    function upgradeReady(card) {
+      if (!upgradeMap.has(card.id)) return false;
+      if (students.size === 0) return Number(card.count || 0) >= 3;
+      return Array.from(students.values()).some((student) => Number(student.cards?.[card.id] || 0) >= 3);
+    }
+
+    function aggregateStudentCounts(source = Array.from(students.values())) {
+      const totals = Object.fromEntries(catalog.map((card) => [card.id, 0]));
+      source.forEach((student) => {
+        catalog.forEach((card) => {
+          totals[card.id] += Number(student.cards?.[card.id] || 0);
+        });
+      });
+      return totals;
+    }
+
+    function sortedStudents() {
+      return Array.from(students.values()).sort((a, b) => Number(a.studentNo) - Number(b.studentNo));
+    }
+
+    function renderStudentTable() {
+      const rows = sortedStudents();
+      if (rows.length === 0) {
+        studentTableWrap.innerHTML = `<p class="quiet" style="padding:12px;margin:0;">目前 Firebase 還沒有學生卡片紀錄。教師登入後可按「匯入0912備份」。</p>`;
+        return;
+      }
+      studentTableWrap.innerHTML = `
+        <table class="student-table">
+          <thead>
+            <tr>
+              <th>學生</th>
+              ${catalog.map((card) => `<th>${card.name}</th>`).join("")}
+              <th>用過UR</th>
+              <th>X卡</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((student) => `
+              <tr>
+                <td>${student.studentNo}</td>
+                ${catalog.map((card) => {
+                  const value = Number(student.cards?.[card.id] || 0);
+                  const ready = highlighted && upgradeMap.has(card.id) && value >= 3;
+                  return `<td class="${ready ? "upgrade-cell" : ""}">
+                    <input data-student="${student.studentNo}" data-student-card="${card.id}" type="number" min="0" step="1" value="${value}" ${teacher ? "" : "disabled"} />
+                  </td>`;
+                }).join("")}
+                <td><input data-student="${student.studentNo}" data-extra="usedUr" type="number" min="0" step="1" value="${Number(student.usedUr || 0)}" ${teacher ? "" : "disabled"} /></td>
+                <td><input data-student="${student.studentNo}" data-extra="xCard" type="number" min="0" step="1" value="${Number(student.xCard || 0)}" ${teacher ? "" : "disabled"} /></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+
+      studentTableWrap.querySelectorAll("[data-student-card]").forEach((input) => {
+        input.addEventListener("change", async () => {
+          if (!teacher) return;
+          const studentNo = input.dataset.student;
+          const cardId = input.dataset.studentCard;
+          const student = students.get(studentNo) || { studentNo, cards: {} };
+          const cardsPatch = { ...(student.cards || {}), [cardId]: Math.max(0, Math.floor(Number(input.value) || 0)) };
+          const updated = { ...student, cards: cardsPatch };
+          students.set(studentNo, updated);
+          await saveStudentRecord(updated);
+          await syncAggregateInventory();
+          setStatus(`${studentNo} 號學生的 ${cardId} 號卡已更新。`);
+        });
+      });
+
+      studentTableWrap.querySelectorAll("[data-extra]").forEach((input) => {
+        input.addEventListener("change", async () => {
+          if (!teacher) return;
+          const studentNo = input.dataset.student;
+          const field = input.dataset.extra;
+          const student = students.get(studentNo) || { studentNo, cards: {} };
+          const updated = { ...student, [field]: Math.max(0, Math.floor(Number(input.value) || 0)) };
+          students.set(studentNo, updated);
+          await saveStudentRecord(updated);
+          setStatus(`${studentNo} 號學生資料已更新。`);
+        });
+      });
+    }
+
+    function renderCards() {
+      const allCards = mergedCards();
+      const readyCount = allCards.filter(upgradeReady).length;
+      grid.innerHTML = allCards.map((card) => `
+        <article class="card ${highlighted && upgradeReady(card) ? "upgrade-ready" : ""}" data-card-id="${card.id}" data-rarity="${card.rarity}">
+          <div class="art">
+            <img src="${card.image}" alt="${card.name}" />
+            <div class="placeholder">${card.id}</div>
+          </div>
+          <div class="meta">
+            <div class="meta-head">
+              <div>
+                <h3>${card.name}</h3>
+                <p class="quiet">${upgradeMap.has(card.id) ? `3 張可升級成 ${upgradeMap.get(card.id)} 號卡` : "最高階或不可升級"}</p>
+              </div>
+              <span class="chip">${card.rarity}</span>
+            </div>
+            <div class="count-row">
+              <span class="count-big">${Number(card.count || 0)}</span>
+              <input data-count-id="${card.id}" type="number" min="0" step="1" value="${Number(card.count || 0)}" ${teacher ? "" : "disabled"} aria-label="${card.name} 數量" />
+            </div>
+          </div>
+        </article>
+      `).join("");
+
+      grid.querySelectorAll(".art img").forEach((img) => {
+        const art = img.closest(".art");
+        img.addEventListener("load", () => art.classList.add("has-image"), { once: true });
+        img.addEventListener("error", () => art.classList.remove("has-image"), { once: true });
+      });
+
+      grid.querySelectorAll("[data-count-id]").forEach((input) => {
+        input.addEventListener("change", async () => {
+          if (!teacher) return;
+          const id = input.dataset.countId;
+          const base = catalog.find((item) => item.id === id);
+          const count = Math.max(0, Math.floor(Number(input.value) || 0));
+          await setDoc(doc(db, "card_inventory", id), {
+            id,
+            name: base.name,
+            rarity: base.rarity,
+            image: base.image,
+            count,
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+          setStatus(`${base.name} 數量已更新。`);
+        });
+      });
+
+      upgradeButton.disabled = readyCount === 0;
+      renderStudentTable();
+      setStatus(readyCount > 0 && highlighted
+        ? `有 ${readyCount} 種卡片可升級，發光的卡片按確認後會各升級一階。`
+        : `目前共 ${allCards.reduce((sum, card) => sum + Number(card.count || 0), 0)} 張卡片。`);
+    }
+
+    async function saveStudentRecord(student, batch = null) {
+      const payload = {
+        studentNo: String(student.studentNo),
+        cards: Object.fromEntries(catalog.map((card) => [card.id, Number(student.cards?.[card.id] || 0)])),
+        usedUr: Number(student.usedUr || 0),
+        xCard: Number(student.xCard || 0),
+        updatedAt: serverTimestamp()
+      };
+      const ref = doc(db, "student_card_records", payload.studentNo);
+      if (batch) {
+        batch.set(ref, payload, { merge: true });
+      } else {
+        await setDoc(ref, payload, { merge: true });
+      }
+    }
+
+    async function syncAggregateInventory(source = Array.from(students.values())) {
+      const totals = aggregateStudentCounts(source);
+      const batch = writeBatch(db);
+      for (const card of catalog) {
+        batch.set(doc(db, "card_inventory", card.id), {
+          ...card,
+          count: Number(totals[card.id] || 0),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+      await batch.commit();
+    }
+
+    async function seedCatalog() {
+      if (!confirm("確認把 0912 備份的 27 位學生卡片紀錄匯入 Firebase？同學生編號會被這份備份覆蓋。")) return;
+      const batch = writeBatch(db);
+      cardSeed0912.forEach((student) => saveStudentRecord(student, batch));
+      await batch.commit();
+      students = new Map(cardSeed0912.map((student) => [String(student.studentNo), student]));
+      await syncAggregateInventory(cardSeed0912);
+      setStatus("0912 備份已匯入 Firebase，並已重算全班卡片總數。");
+    }
+
+    async function runUpgrade() {
+      const readyStudents = [];
+      sortedStudents().forEach((student) => {
+        catalog.forEach((card) => {
+          if (upgradeMap.has(card.id) && Number(student.cards?.[card.id] || 0) >= 3) {
+            readyStudents.push({ studentNo: student.studentNo, cardId: card.id, targetId: upgradeMap.get(card.id) });
+          }
+        });
+      });
+      const ready = students.size > 0 ? readyStudents : mergedCards().filter(upgradeReady);
+      if (ready.length === 0) {
+        setStatus("目前沒有三張以上可升級的卡片。");
+        return;
+      }
+      const lines = students.size > 0
+        ? ready.map((item) => `${item.studentNo} 號學生：${item.cardId} 號卡 -3，${item.targetId} 號卡 +1`).join("\n")
+        : ready.map((card) => `${card.name} -3，${upgradeMap.get(card.id)} 號卡 +1`).join("\n");
+      if (!confirm(`確認升級以下卡片？\n\n${lines}`)) return;
+
+      const deltas = new Map();
+      const batch = writeBatch(db);
+      if (students.size > 0) {
+        const updatedStudents = new Map(students);
+        for (const item of ready) {
+          const student = updatedStudents.get(String(item.studentNo));
+          const studentCards = { ...(student.cards || {}) };
+          studentCards[item.cardId] = Number(studentCards[item.cardId] || 0) - 3;
+          studentCards[item.targetId] = Number(studentCards[item.targetId] || 0) + 1;
+          updatedStudents.set(String(item.studentNo), { ...student, cards: studentCards });
+        }
+        updatedStudents.forEach((student) => saveStudentRecord(student, batch));
+        students = updatedStudents;
+        const totals = aggregateStudentCounts(Array.from(updatedStudents.values()));
+        catalog.forEach((card) => {
+          batch.set(doc(db, "card_inventory", card.id), {
+            ...card,
+            count: Number(totals[card.id] || 0),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        });
+      } else {
+        for (const card of ready) {
+          const targetId = upgradeMap.get(card.id);
+          deltas.set(card.id, (deltas.get(card.id) || 0) - 3);
+          deltas.set(targetId, (deltas.get(targetId) || 0) + 1);
+        }
+        for (const [id, delta] of deltas) {
+          const base = catalog.find((item) => item.id === id);
+          batch.set(doc(db, "card_inventory", id), {
+            id,
+            name: base.name,
+            rarity: base.rarity,
+            image: base.image,
+            count: increment(delta),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        }
+      }
+
+      await batch.commit();
+      highlighted = false;
+      ready.forEach((item) => {
+        const id = item.cardId || item.id;
+        const node = grid.querySelector(`[data-card-id="${id}"]`);
+        if (node) node.classList.add("upgraded");
+      });
+      setStatus("升級完成：每種發光卡片扣 3 張，上一階卡片增加 1 張。");
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let quoted = false;
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (quoted && char === '"' && next === '"') {
+          cell += '"';
+          i += 1;
+        } else if (char === '"') {
+          quoted = !quoted;
+        } else if (!quoted && char === ",") {
+          row.push(cell);
+          cell = "";
+        } else if (!quoted && (char === "\n" || char === "\r")) {
+          if (char === "\r" && next === "\n") i += 1;
+          row.push(cell);
+          if (row.some((value) => value.trim() !== "")) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += char;
+        }
+      }
+      row.push(cell);
+      if (row.some((value) => value.trim() !== "")) rows.push(row);
+      return rows;
+    }
+
+    async function importCsv(file) {
+      if (!teacher || !file) return;
+      const text = await file.text();
+      const rows = parseCsv(text);
+      if (rows.length === 0) return;
+      const rawHeader = rows[0].map((value) => value.trim());
+      const header = rawHeader.map((value) => value.toLowerCase());
+      const studentIndex = rawHeader.indexOf("學生編號");
+      if (studentIndex >= 0) {
+        const importedStudents = rows.slice(1).map((row) => {
+          const cardsValue = {};
+          catalog.forEach((card) => {
+            const column = rawHeader.findIndex((name) => name.startsWith(`${card.id}號`));
+            cardsValue[card.id] = Math.max(0, Math.floor(Number(row[column]) || 0));
+          });
+          return {
+            studentNo: String(row[studentIndex] || "").trim(),
+            cards: cardsValue,
+            usedUr: Math.max(0, Math.floor(Number(row[rawHeader.indexOf("用過UR次數")]) || 0)),
+            xCard: Math.max(0, Math.floor(Number(row[rawHeader.indexOf("X卡")]) || 0))
+          };
+        }).filter((student) => student.studentNo);
+        const batch = writeBatch(db);
+        importedStudents.forEach((student) => saveStudentRecord(student, batch));
+        await batch.commit();
+        students = new Map(importedStudents.map((student) => [String(student.studentNo), student]));
+        await syncAggregateInventory(importedStudents);
+        csvInput.value = "";
+        setStatus(`學生抽卡紀錄 CSV 匯入完成，共更新 ${importedStudents.length} 位學生。`);
+        return;
+      }
+
+      const hasHeader = header.some((value) => ["id", "cardid", "card_id", "count", "name", "rarity"].includes(value));
+      const dataRows = hasHeader ? rows.slice(1) : rows;
+      const indexOf = (...names) => names.map((name) => header.indexOf(name)).find((index) => index >= 0);
+      const idIndex = hasHeader ? indexOf("id", "cardid", "card_id", "卡號") : 0;
+      const countIndex = hasHeader ? indexOf("count", "qty", "quantity", "數量") : 1;
+      const nameIndex = hasHeader ? indexOf("name", "名稱") : -1;
+      const rarityIndex = hasHeader ? indexOf("rarity", "稀有度") : -1;
+      const batch = writeBatch(db);
+      let imported = 0;
+      for (const row of dataRows) {
+        const id = String(row[idIndex] || "").trim();
+        if (!id) continue;
+        const base = catalog.find((card) => card.id === id) || { id, name: `${id}卡`, rarity: "R", image: `./class-console-files/cards/${id}.jpg` };
+        const count = Math.max(0, Math.floor(Number(row[countIndex]) || 0));
+        batch.set(doc(db, "card_inventory", id), {
+          id,
+          name: String(row[nameIndex] || base.name).trim() || base.name,
+          rarity: String(row[rarityIndex] || base.rarity).trim().toUpperCase() || base.rarity,
+          image: base.image,
+          count,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        imported += 1;
+      }
+      if (imported > 0) await batch.commit();
+      csvInput.value = "";
+      setStatus(`CSV 匯入完成，共更新 ${imported} 種卡片。`);
+    }
+
+    async function teacherLogin() {
+      try {
+        setStatus("正在開啟 Google 登入...");
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (error) {
+          if (["auth/popup-blocked", "auth/popup-closed-by-user", "auth/cancelled-popup-request"].includes(error.code)) {
+            setStatus("彈出視窗被瀏覽器擋下，改用跳轉登入...");
+            await signInWithRedirect(auth, provider);
+            return;
+          }
+          throw error;
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(error.code === "auth/unauthorized-domain"
+          ? "Firebase 尚未授權這個網址，請在 Authentication Authorized domains 加入 localhost 或目前網域。"
+          : `登入失敗：${error.message || "請確認 Firebase Google 登入已啟用。"}`);
+      }
+    }
+
+    function renderTeacher(user) {
+      teacher = isTeacher(user);
+      loginButton.classList.toggle("hidden", Boolean(user));
+      logoutButton.classList.toggle("hidden", !user);
+      editPanel.classList.toggle("hidden", !teacher);
+      upgradeHintButton.classList.toggle("hidden", !teacher);
+      upgradeButton.classList.toggle("hidden", !teacher);
+      seedButton.classList.toggle("hidden", !teacher);
+      if (user && !teacher) {
+        setStatus("這個帳號不是教師 Gmail，已登出；學生可直接查看卡片狀態。");
+        signOut(auth);
+      }
+      renderCards();
+    }
+
+    if (!hasCardFirebaseConfig()) {
+      loginButton.disabled = true;
+      grid.innerHTML = `<p class="quiet">抽卡 Firebase 尚未設定，請先把新專案設定貼到 card-firebase-config.js。</p>`;
+      setStatus("抽卡 Firebase 尚未設定。");
+    } else {
+      const app = initializeApp(cardFirebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      loginButton.addEventListener("click", teacherLogin);
+      logoutButton.addEventListener("click", () => signOut(auth));
+      seedButton.addEventListener("click", seedCatalog);
+      upgradeHintButton.addEventListener("click", () => {
+        highlighted = true;
+        renderCards();
+      });
+      upgradeButton.addEventListener("click", runUpgrade);
+      csvInput.addEventListener("change", () => importCsv(csvInput.files[0]));
+      onSnapshot(collection(db, "card_inventory"), (snap) => {
+        cards = new Map(snap.docs.map((item) => [item.id, item.data()]));
+        renderCards();
+      }, (error) => {
+        console.error(error);
+        setStatus("卡片資料讀取失敗，請確認 Firestore Rules 已更新。");
+      });
+      onSnapshot(collection(db, "student_card_records"), (snap) => {
+        students = new Map(snap.docs.map((item) => [item.id, item.data()]));
+        renderCards();
+      }, (error) => {
+        console.error(error);
+        setStatus("學生卡片資料讀取失敗，請確認 Firestore Rules 已更新。");
+      });
+      onAuthStateChanged(auth, renderTeacher);
+    }
+  </script>
+  <script>
+    if (location.protocol === "file:") {
+      const message = "Google 登入需要用 http://127.0.0.1:5199/card-status.html 開啟，不能直接雙擊 HTML 檔。";
+      document.addEventListener("DOMContentLoaded", () => {
+        const status = document.getElementById("status");
+        if (status) status.textContent = message;
+        document.querySelectorAll("button").forEach((button) => {
+          if (button.textContent.includes("登入")) {
+            button.addEventListener("click", () => alert(message));
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

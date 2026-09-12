@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>抽卡區 | Charlie 的班級網站</title>
+  <style>
+    :root {
+      --bg: #05070d;
+      --ink: #f3f7ff;
+      --muted: #a9b4c7;
+      --line: rgba(232, 238, 255, 0.16);
+      --cyan: #00f5d4;
+      --blue: #35a7ff;
+      --green: #b8ff33;
+      --amber: #ffb000;
+      --rose: #ff2e88;
+      --violet: #a855f7;
+      --radius: 8px;
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(0, 245, 212, 0.2), transparent 24rem),
+        radial-gradient(circle at 88% 10%, rgba(255, 46, 136, 0.18), transparent 28rem),
+        radial-gradient(circle at 54% 100%, rgba(255, 176, 0, 0.13), transparent 30rem),
+        linear-gradient(135deg, #03040a 0%, #080b12 42%, #10131c 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(115deg, transparent 0 42%, rgba(0, 245, 212, 0.08) 42% 43%, transparent 43% 100%);
+      background-size: 42px 42px, 42px 42px, 100% 100%;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 82%);
+      pointer-events: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+
+    .page {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 44px;
+    }
+
+    .glass {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04)),
+        rgba(8, 11, 19, 0.66);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 24px 70px rgba(0, 0, 0, 0.44);
+      backdrop-filter: blur(24px) saturate(165%);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--cyan), var(--blue), var(--rose));
+      color: #02040a;
+      font-weight: 950;
+      box-shadow: 0 0 24px rgba(0, 245, 212, 0.26);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    .brand h1 { margin: 0; font-size: clamp(1.2rem, 2.6vw, 1.7rem); line-height: 1.15; }
+    .brand p { margin: 3px 0 0; color: var(--muted); }
+
+    .nav, .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 13px;
+      border: 1px solid rgba(232, 238, 255, 0.18);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .button.primary {
+      border-color: rgba(0, 245, 212, 0.42);
+      background: linear-gradient(145deg, rgba(0, 245, 212, 0.28), rgba(53, 167, 255, 0.14));
+      box-shadow: 0 0 22px rgba(0, 245, 212, 0.15);
+    }
+
+    .button.warn {
+      border-color: rgba(255, 176, 0, 0.42);
+      color: #ffe6a6;
+    }
+
+    .button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .hidden { display: none !important; }
+
+    .access {
+      display: grid;
+      place-items: center;
+      min-height: 62vh;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .access-card {
+      width: min(520px, 100%);
+      padding: clamp(22px, 4vw, 34px);
+    }
+
+    .access-card h2 {
+      margin-bottom: 10px;
+      font-size: clamp(2rem, 6vw, 4rem);
+      line-height: 0.96;
+    }
+
+    .quiet { color: var(--muted); line-height: 1.7; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.35fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .panel { padding: 16px; }
+
+    .hero-title {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: clamp(18px, 3vw, 28px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-title::after {
+      content: "";
+      position: absolute;
+      inset: auto -60px -80px auto;
+      width: 340px;
+      height: 240px;
+      background:
+        linear-gradient(90deg, rgba(0, 245, 212, 0.18) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 46, 136, 0.16) 1px, transparent 1px);
+      background-size: 28px 28px;
+      transform: rotate(-8deg);
+      pointer-events: none;
+    }
+
+    .kicker {
+      color: var(--cyan);
+      font-weight: 950;
+      text-shadow: 0 0 18px rgba(0, 245, 212, 0.42);
+    }
+
+    .hero-title h2 {
+      max-width: 840px;
+      margin: 0;
+      font-size: clamp(2.15rem, 6vw, 5.4rem);
+      line-height: 0.94;
+      text-wrap: balance;
+    }
+
+    .summaries {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .summary {
+      min-height: 92px;
+      padding: 12px;
+      border: 1px solid rgba(232, 238, 255, 0.14);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .summary b { display: block; font-size: 1.8rem; line-height: 1; }
+    .summary span { color: var(--muted); font-weight: 800; }
+
+    .student-pick {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+      color: #dce7ff;
+      font-weight: 900;
+    }
+
+    .student-pick input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 10px;
+      border: 1px solid rgba(232, 238, 255, 0.16);
+      border-radius: var(--radius);
+      background: rgba(2, 6, 23, 0.56);
+      color: var(--ink);
+      font: inherit;
+      font-weight: 900;
+    }
+
+    .draw-stage {
+      position: relative;
+      min-height: 560px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .draw-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.16), transparent 14rem),
+        conic-gradient(from 0deg, rgba(0, 245, 212, 0.12), rgba(255, 46, 136, 0.2), rgba(255, 176, 0, 0.14), rgba(53, 167, 255, 0.16), rgba(0, 245, 212, 0.12));
+      opacity: 0.55;
+      filter: blur(18px);
+      pointer-events: none;
+    }
+
+    .stage-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      min-height: 390px;
+      border: 1px solid rgba(232, 238, 255, 0.12);
+      border-radius: var(--radius);
+      background: rgba(2, 6, 23, 0.32);
+      overflow: hidden;
+    }
+
+    .portal {
+      width: min(420px, 80vw);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      position: relative;
+      background:
+        radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 7%, rgba(0, 245, 212, 0.55) 8% 18%, transparent 19%),
+        conic-gradient(from 0deg, var(--cyan), var(--rose), var(--amber), var(--blue), var(--cyan));
+      box-shadow: 0 0 34px rgba(0, 245, 212, 0.35), 0 0 110px rgba(255, 46, 136, 0.2);
+      animation: portalIdle 8s linear infinite;
+    }
+
+    .portal::before,
+    .portal::after {
+      content: "";
+      position: absolute;
+      inset: 12%;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.42);
+      box-shadow: inset 0 0 40px rgba(2, 6, 23, 0.8);
+    }
+
+    .portal::after {
+      inset: 28%;
+      border-style: dashed;
+      animation: portalIdle 4s linear infinite reverse;
+    }
+
+    .portal-text {
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 48%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(3, 4, 10, 0.86);
+      border: 1px solid rgba(232, 238, 255, 0.2);
+      color: #f8fbff;
+      font-size: clamp(1.4rem, 5vw, 3.2rem);
+      font-weight: 950;
+      text-shadow: 0 0 24px rgba(255, 255, 255, 0.35);
+    }
+
+    .stage-inner.drawing .portal {
+      animation: portalBurst 1.2s ease-in-out infinite;
+    }
+
+    .stage-inner.reveal {
+      animation: screenFlash 900ms ease both;
+    }
+
+    .pulled-card {
+      width: min(330px, 78vw);
+      min-height: 430px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 12px;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.035)),
+        rgba(8, 11, 19, 0.86);
+      box-shadow: 0 0 40px rgba(0, 245, 212, 0.24), 0 28px 70px rgba(0, 0, 0, 0.48);
+      animation: cardReveal 860ms cubic-bezier(.16, 1, .3, 1) both;
+      transform-style: preserve-3d;
+    }
+
+    .pulled-card[data-rarity="SR"] { box-shadow: 0 0 46px rgba(0, 245, 212, 0.28), 0 0 86px rgba(53, 167, 255, 0.18); }
+    .pulled-card[data-rarity="SSR"] { box-shadow: 0 0 54px rgba(255, 176, 0, 0.34), 0 0 100px rgba(255, 46, 136, 0.18); }
+    .pulled-card[data-rarity="UR"] { box-shadow: 0 0 64px rgba(255, 46, 136, 0.42), 0 0 120px rgba(184, 255, 51, 0.18); }
+
+    .art {
+      display: grid;
+      place-items: center;
+      min-height: 310px;
+      border: 1px solid rgba(232, 238, 255, 0.14);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(0, 245, 212, 0.14), rgba(255, 46, 136, 0.11)),
+        rgba(255, 255, 255, 0.045);
+      overflow: hidden;
+    }
+
+    .art img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .art.has-image img { display: block; }
+    .art.has-image .placeholder { display: none; }
+
+    .placeholder {
+      display: grid;
+      place-items: center;
+      width: 72%;
+      aspect-ratio: 1;
+      border: 1px dashed rgba(232, 238, 255, 0.24);
+      border-radius: var(--radius);
+      color: rgba(243, 247, 255, 0.84);
+      font-size: clamp(4rem, 18vw, 8rem);
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-meta h3 { margin: 0; font-size: 1.65rem; }
+    .rarity {
+      padding: 7px 9px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(232, 238, 255, 0.18);
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+
+    .history {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-list {
+      max-height: 235px;
+      overflow: auto;
+      display: grid;
+      gap: 8px;
+      padding-right: 4px;
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: 46px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 9px;
+      border: 1px solid rgba(232, 238, 255, 0.12);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .chip {
+      display: inline-grid;
+      place-items: center;
+      min-width: 38px;
+      min-height: 30px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(232, 238, 255, 0.18);
+      font-weight: 950;
+    }
+
+    .status {
+      min-height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 8px 10px;
+      border: 1px solid rgba(232, 238, 255, 0.14);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.06);
+      color: #c8d5eb;
+      font-weight: 850;
+      text-align: center;
+    }
+
+    @keyframes portalIdle { to { transform: rotate(360deg); } }
+    @keyframes portalBurst {
+      0% { transform: rotate(0deg) scale(1); filter: hue-rotate(0deg); }
+      50% { transform: rotate(180deg) scale(1.08); filter: hue-rotate(80deg); }
+      100% { transform: rotate(360deg) scale(1); filter: hue-rotate(0deg); }
+    }
+    @keyframes screenFlash {
+      0% { box-shadow: inset 0 0 0 rgba(255, 255, 255, 0); }
+      30% { box-shadow: inset 0 0 140px rgba(255, 255, 255, 0.8), 0 0 80px rgba(0, 245, 212, 0.32); }
+      100% { box-shadow: inset 0 0 0 rgba(255, 255, 255, 0); }
+    }
+    @keyframes cardReveal {
+      0% { opacity: 0; transform: translateY(34px) rotateX(70deg) scale(0.72); filter: blur(12px); }
+      60% { opacity: 1; transform: translateY(-8px) rotateX(0deg) scale(1.04); filter: blur(0); }
+      100% { opacity: 1; transform: translateY(0) rotateX(0deg) scale(1); }
+    }
+
+    @media (max-width: 940px) {
+      .layout { grid-template-columns: 1fr; }
+      .summaries { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .draw-stage { min-height: auto; }
+    }
+
+    @media (max-width: 640px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .nav, .nav .button { width: 100%; }
+      .button { width: 100%; }
+      .summaries { grid-template-columns: 1fr; }
+      .history-row { grid-template-columns: 40px 1fr; }
+      .history-row .chip:last-child { grid-column: 2; justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar glass">
+      <a class="brand" href="./index.html">
+        <span class="mark">C</span>
+        <span><h1>抽卡區</h1><p>Card draw console</p></span>
+      </a>
+      <nav class="nav">
+        <a class="button" href="./card-status.html">目前卡片狀態區</a>
+        <a class="button" href="./class-tools.html">工具入口</a>
+        <button class="button primary" id="loginButton" type="button">教師 Google 登入</button>
+        <button class="button hidden" id="logoutButton" type="button">登出</button>
+      </nav>
+    </header>
+
+    <section class="access" id="accessPanel">
+      <div class="access-card glass">
+        <p class="kicker">Teacher Only</p>
+        <h2>請使用教師 Gmail 登入。</h2>
+        <p class="quiet">抽卡區不開放學生帳號。登入前不會顯示抽卡畫面；登入後會把本次抽卡紀錄暫存在畫面上，按匯出後才寫入卡片狀態區。</p>
+        <button class="button primary" id="accessLoginButton" type="button">教師 Google 登入</button>
+        <p class="quiet" id="accessMessage">等待登入。</p>
+      </div>
+    </section>
+
+    <section class="hidden" id="appPanel">
+      <section class="hero-title glass">
+        <span class="kicker">Class Card Portal</span>
+        <h2>啟動今日的抽卡儀式。</h2>
+        <p class="quiet">R 卡 10、11、12 會分配剩餘機率；SR 每張 4%，SSR 每張 1%，UR 每張 0.25%。</p>
+      </section>
+
+      <section class="layout">
+        <aside class="panel glass">
+          <h2>本次紀錄</h2>
+          <label class="student-pick">
+            學生編號
+            <input id="studentNo" type="number" min="1" max="99" placeholder="開始抽卡前先輸入，例如 1" />
+          </label>
+          <div class="summaries">
+            <div class="summary"><b id="totalCount">0</b><span>總抽數</span></div>
+            <div class="summary"><b id="rCount">0</b><span>R</span></div>
+            <div class="summary"><b id="srCount">0</b><span>SR</span></div>
+            <div class="summary"><b id="highCount">0</b><span>SSR / UR</span></div>
+          </div>
+          <div class="history">
+            <h3>抽卡清單</h3>
+            <div class="history-list" id="historyList"></div>
+          </div>
+          <div class="actions">
+            <button class="button warn" id="clearButton" type="button">清除本次</button>
+            <button class="button primary" id="exportButton" type="button">匯出本次紀錄</button>
+          </div>
+        </aside>
+
+        <section class="panel glass draw-stage">
+          <div class="stage-inner" id="stage">
+            <div class="portal" id="portal"><div class="portal-text">READY</div></div>
+          </div>
+          <div class="actions">
+            <button class="button primary" id="drawButton" type="button">開始抽卡</button>
+            <a class="button" href="./card-status.html">查看狀態</a>
+          </div>
+          <div class="status" id="status">卡池已準備好。</div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signInWithPopup,
+      signInWithRedirect,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import {
+      collection,
+      doc,
+      getFirestore,
+      increment,
+      serverTimestamp,
+      setDoc,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    import { cardFirebaseConfig, hasCardFirebaseConfig } from "./card-firebase-config.js";
+
+    const TEACHER_EMAIL = "a776663@gmail.com";
+    const catalog = [
+      { id: "1", rarity: "UR", weight: 0.25 }, { id: "2", rarity: "UR", weight: 0.25 }, { id: "3", rarity: "UR", weight: 0.25 },
+      { id: "4", rarity: "SSR", weight: 1 }, { id: "5", rarity: "SSR", weight: 1 }, { id: "6", rarity: "SSR", weight: 1 },
+      { id: "7", rarity: "SR", weight: 4 }, { id: "8", rarity: "SR", weight: 4 }, { id: "9", rarity: "SR", weight: 4 },
+      { id: "10", rarity: "R" }, { id: "11", rarity: "R" }, { id: "12", rarity: "R" }
+    ].map((card) => ({ ...card, name: `${card.id}${card.rarity}`, image: `./class-console-files/cards/${card.id}.jpg` }));
+
+    const fixedWeight = catalog.filter((card) => card.rarity !== "R").reduce((sum, card) => sum + card.weight, 0);
+    const rWeight = (100 - fixedWeight) / catalog.filter((card) => card.rarity === "R").length;
+    catalog.forEach((card) => {
+      if (card.rarity === "R") card.weight = rWeight;
+    });
+
+    const $ = (id) => document.getElementById(id);
+    const loginButton = $("loginButton");
+    const accessLoginButton = $("accessLoginButton");
+    const logoutButton = $("logoutButton");
+    const accessPanel = $("accessPanel");
+    const appPanel = $("appPanel");
+    const stage = $("stage");
+    const statusBox = $("status");
+    const historyList = $("historyList");
+    const drawButton = $("drawButton");
+    const exportButton = $("exportButton");
+    const clearButton = $("clearButton");
+    const studentNoInput = $("studentNo");
+    const accessMessage = $("accessMessage");
+    let auth;
+    let db;
+    let sessionResults = [];
+    let drawing = false;
+    let currentStudentNo = "";
+
+    function isTeacher(user) {
+      return (user?.email || "").toLowerCase() === TEACHER_EMAIL;
+    }
+
+    function setStatus(message) {
+      statusBox.textContent = message;
+      accessMessage.textContent = message;
+    }
+
+    function pickCard() {
+      const roll = Math.random() * 100;
+      let cursor = 0;
+      for (const card of catalog) {
+        cursor += card.weight;
+        if (roll <= cursor) return card;
+      }
+      return catalog[catalog.length - 1];
+    }
+
+    function rarityCounts() {
+      return sessionResults.reduce((counts, item) => {
+        counts[item.rarity] = (counts[item.rarity] || 0) + 1;
+        return counts;
+      }, {});
+    }
+
+    function renderHistory() {
+      const counts = rarityCounts();
+      $("totalCount").textContent = sessionResults.length;
+      $("rCount").textContent = counts.R || 0;
+      $("srCount").textContent = counts.SR || 0;
+      $("highCount").textContent = (counts.SSR || 0) + (counts.UR || 0);
+      exportButton.disabled = sessionResults.length === 0;
+      clearButton.disabled = sessionResults.length === 0;
+      studentNoInput.disabled = sessionResults.length > 0;
+      historyList.innerHTML = sessionResults.length
+        ? sessionResults.map((item, index) => `
+            <div class="history-row">
+              <span class="chip">${index + 1}</span>
+              <strong>${item.name}</strong>
+              <span class="chip">${item.rarity}</span>
+            </div>
+          `).join("")
+        : `<p class="quiet">還沒有抽卡紀錄。</p>`;
+    }
+
+    function cardMarkup(card) {
+      return `
+        <article class="pulled-card" data-rarity="${card.rarity}">
+          <div class="art" id="resultArt">
+            <img src="${card.image}" alt="${card.name}" />
+            <div class="placeholder">${card.id}</div>
+          </div>
+          <div class="card-meta">
+            <div>
+              <p class="quiet">本次抽出</p>
+              <h3>${card.name}</h3>
+            </div>
+            <span class="rarity">${card.rarity}</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function selectedStudentNo() {
+      const value = Math.floor(Number(studentNoInput.value) || 0);
+      return value > 0 ? String(value) : "";
+    }
+
+    async function drawCard() {
+      if (drawing) return;
+      const studentNo = selectedStudentNo();
+      if (!studentNo) {
+        setStatus("請先輸入學生編號，再開始抽卡。");
+        studentNoInput.focus();
+        return;
+      }
+      if (!currentStudentNo) {
+        currentStudentNo = studentNo;
+        studentNoInput.value = currentStudentNo;
+      }
+      drawing = true;
+      drawButton.disabled = true;
+      stage.classList.remove("reveal");
+      stage.classList.add("drawing");
+      stage.innerHTML = `<div class="portal"><div class="portal-text">DRAW</div></div>`;
+      setStatus("抽卡能量展開中...");
+
+      await new Promise((resolve) => setTimeout(resolve, 1250));
+      const card = pickCard();
+      sessionResults.push({ ...card, drawnAt: new Date().toISOString() });
+      stage.classList.remove("drawing");
+      stage.classList.add("reveal");
+      stage.innerHTML = cardMarkup(card);
+      const img = stage.querySelector("img");
+      const art = stage.querySelector("#resultArt");
+      img.addEventListener("load", () => art.classList.add("has-image"), { once: true });
+      img.addEventListener("error", () => art.classList.remove("has-image"), { once: true });
+      renderHistory();
+      setStatus(`${currentStudentNo} 號學生抽到 ${card.name}。`);
+      drawButton.disabled = false;
+      drawing = false;
+    }
+
+    function selectedExportRange() {
+      if (sessionResults.length === 0) return null;
+      const range = prompt(`本次共有 ${sessionResults.length} 筆。請輸入要匯出的範圍，例如 1-${sessionResults.length}，或輸入 all 匯出全部。`, `1-${sessionResults.length}`);
+      if (range === null) return null;
+      const text = range.trim().toLowerCase();
+      if (text === "all" || text === "全部") return { start: 1, end: sessionResults.length };
+      const match = text.match(/^(\d+)\s*-\s*(\d+)$/) || text.match(/^(\d+)$/);
+      if (!match) {
+        alert("範圍格式不正確。");
+        return null;
+      }
+      const start = Math.max(1, Number(match[1]));
+      const end = Math.min(sessionResults.length, Number(match[2] || match[1]));
+      if (start > end) {
+        alert("起始筆數不可大於結束筆數。");
+        return null;
+      }
+      return { start, end };
+    }
+
+    async function exportResults() {
+      const range = selectedExportRange();
+      if (!range) return;
+      const studentNo = currentStudentNo || selectedStudentNo();
+      if (!studentNo) {
+        alert("請先輸入學生編號。");
+        return;
+      }
+      const items = sessionResults.slice(range.start - 1, range.end);
+      const label = `${range.start}-${range.end}`;
+      const ok = confirm(`確認把第 ${label} 筆，共 ${items.length} 張，匯出到 ${studentNo} 號學生，並加入目前卡片狀態區？`);
+      if (!ok) return;
+
+      exportButton.disabled = true;
+      setStatus("正在寫入 Firebase...");
+      const batch = writeBatch(db);
+      const logRef = doc(collection(db, "card_draw_logs"));
+      batch.set(logRef, {
+        range: label,
+        studentNo,
+        total: items.length,
+        cards: items.map(({ id, name, rarity, drawnAt }) => ({ id, name, rarity, drawnAt })),
+        createdAt: serverTimestamp(),
+        createdBy: auth.currentUser?.email || ""
+      });
+      const addedCounts = items.reduce((map, item) => {
+        map.set(item.id, (map.get(item.id) || 0) + 1);
+        return map;
+      }, new Map());
+      for (const [id, amount] of addedCounts) {
+        const card = catalog.find((item) => item.id === id);
+        batch.set(doc(db, "card_inventory", id), {
+          id,
+          name: card.name,
+          rarity: card.rarity,
+          image: card.image,
+          count: increment(amount),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+      const studentCardPatch = {};
+      for (const [id, amount] of addedCounts) {
+        studentCardPatch[id] = increment(amount);
+      }
+      batch.set(doc(db, "student_card_records", studentNo), {
+        studentNo,
+        cards: studentCardPatch,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      await batch.commit();
+      setStatus(`已匯出並加入 ${studentNo} 號學生的目前卡片狀態。`);
+      window.location.href = "./card-status.html";
+    }
+
+    async function teacherLogin() {
+      try {
+        setStatus("正在開啟 Google 登入...");
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: "select_account" });
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (error) {
+          if (["auth/popup-blocked", "auth/popup-closed-by-user", "auth/cancelled-popup-request"].includes(error.code)) {
+            setStatus("彈出視窗被瀏覽器擋下，改用跳轉登入...");
+            await signInWithRedirect(auth, provider);
+            return;
+          }
+          throw error;
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(error.code === "auth/unauthorized-domain"
+          ? "Firebase 尚未授權這個網址，請在 Authentication Authorized domains 加入 localhost 或目前網域。"
+          : `登入失敗：${error.message || "請確認 Firebase Google 登入已啟用。"}`);
+      }
+    }
+
+    function renderAccess(user) {
+      const allowed = isTeacher(user);
+      accessPanel.classList.toggle("hidden", allowed);
+      appPanel.classList.toggle("hidden", !allowed);
+      loginButton.classList.toggle("hidden", Boolean(user));
+      logoutButton.classList.toggle("hidden", !user);
+      if (!user) {
+        setStatus("等待教師登入。");
+      } else if (!allowed) {
+        setStatus("這個帳號不是教師 Gmail，抽卡區不開放使用。");
+        signOut(auth);
+      } else {
+        setStatus("教師登入成功。請先輸入學生編號，再開始抽卡。");
+      }
+    }
+
+    if (!hasCardFirebaseConfig()) {
+      loginButton.disabled = true;
+      accessLoginButton.disabled = true;
+      accessMessage.textContent = "抽卡 Firebase 尚未設定，請先把新專案設定貼到 card-firebase-config.js。";
+      renderHistory();
+    } else {
+      const app = initializeApp(cardFirebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+      loginButton.addEventListener("click", teacherLogin);
+      accessLoginButton.addEventListener("click", teacherLogin);
+      logoutButton.addEventListener("click", () => signOut(auth));
+      drawButton.addEventListener("click", drawCard);
+      exportButton.addEventListener("click", exportResults);
+      clearButton.addEventListener("click", () => {
+        if (sessionResults.length && !confirm("確定清除本次尚未匯出的抽卡紀錄？")) return;
+        sessionResults = [];
+        currentStudentNo = "";
+        studentNoInput.disabled = false;
+        studentNoInput.value = "";
+        stage.classList.remove("drawing", "reveal");
+        stage.innerHTML = `<div class="portal"><div class="portal-text">READY</div></div>`;
+        renderHistory();
+        setStatus("本次紀錄已清除。請先選學生編號再開始下一輪抽卡。");
+      });
+      renderHistory();
+      onAuthStateChanged(auth, renderAccess);
+    }
+  </script>
+  <script>
+    if (location.protocol === "file:") {
+      const message = "Google 登入需要用 http://127.0.0.1:5199/card-draw.html 開啟，不能直接雙擊 HTML 檔。";
+      document.addEventListener("DOMContentLoaded", () => {
+        const accessMessage = document.getElementById("accessMessage");
+        if (accessMessage) accessMessage.textContent = message;
+        document.querySelectorAll("button").forEach((button) => {
+          if (button.textContent.includes("Google")) {
+            button.addEventListener("click", () => alert(message));
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

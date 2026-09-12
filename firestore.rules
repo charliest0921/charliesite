@@ -6,25 +6,135 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
+    function isTeacher() {
+      return signedIn() && request.auth.token.email == "a776663@gmail.com";
+    }
+
+    function isStudent() {
       return signedIn()
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.isAdmin == true;
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
-    match /widgets/{widgetId} {
+    function isClassUser() {
+      return isTeacher() || isStudent();
+    }
+
+    function settingsExists() {
+      return exists(/databases/$(database)/documents/wordcloud_settings/main);
+    }
+
+    function settings() {
+      return get(/databases/$(database)/documents/wordcloud_settings/main).data;
+    }
+
+    function validSettings() {
+      return request.resource.data.keys().hasOnly(["status", "privacy", "direction", "round", "needsReset", "updatedAt"])
+        && request.resource.data.status in ["open", "closed"]
+        && request.resource.data.privacy in ["public", "semi", "anonymous"]
+        && request.resource.data.direction in ["oneWay", "twoWay"]
+        && request.resource.data.round is int
+        && request.resource.data.needsReset is bool
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    function keepsLockedMode() {
+      return !exists(/databases/$(database)/documents/wordcloud_settings/main)
+        || (
+          resource.data.status != "open"
+          && resource.data.needsReset != true
+        )
+        || (
+          request.resource.data.privacy == resource.data.privacy
+          && request.resource.data.direction == resource.data.direction
+        );
+    }
+
+    function validMessageCreate() {
+      return settingsExists()
+        && settings().status == "open"
+        && request.resource.data.keys().hasOnly(["content", "createdAt", "authorDisplayName", "privacy", "round"])
+        && request.resource.data.content is string
+        && request.resource.data.content.size() > 0
+        && request.resource.data.content.size() <= 1200
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.privacy == settings().privacy
+        && request.resource.data.round == settings().round
+        && (
+          (
+            settings().privacy == "public"
+            && request.resource.data.authorDisplayName is string
+            && request.resource.data.authorDisplayName.size() > 0
+            && request.resource.data.authorDisplayName.size() <= 120
+          )
+          || (
+            settings().privacy in ["semi", "anonymous"]
+            && request.resource.data.authorDisplayName == "匿名"
+          )
+        );
+    }
+
+    function validAuthorCreate(messageId) {
+      return settingsExists()
+        && settings().status == "open"
+        && exists(/databases/$(database)/documents/wordcloud_msgs/$(messageId))
+        && request.resource.data.keys().hasOnly(["uid", "displayName", "name", "email", "role", "privacy", "round", "createdAt"])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 120
+        && request.resource.data.name == request.resource.data.displayName
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 180
+        && request.resource.data.role in ["teacher", "student"]
+        && (
+          (isTeacher() && request.resource.data.role == "teacher")
+          || (isStudent() && request.resource.data.role == "student")
+        )
+        && request.resource.data.privacy == settings().privacy
+        && request.resource.data.round == settings().round
+        && request.resource.data.createdAt == request.time;
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isTeacher());
+      allow create, update: if isTeacher();
+      allow delete: if isTeacher();
+    }
+
+    match /wordcloud_settings/{settingId} {
+      allow read: if isClassUser();
+      allow create, update: if isTeacher() && settingId == "main" && validSettings() && keepsLockedMode();
+      allow delete: if isTeacher();
+    }
+
+    match /wordcloud_msgs/{messageId} {
+      allow read: if isClassUser()
+        && (isTeacher() || (settingsExists() && settings().direction == "twoWay"));
+      allow create: if isClassUser() && validMessageCreate();
+      allow update, delete: if isTeacher();
+    }
+
+    match /wordcloud_msg_authors/{messageId} {
+      allow read, update, delete: if isTeacher();
+      allow create: if isClassUser() && validAuthorCreate(messageId);
+    }
+
+    match /card_inventory/{cardId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if isTeacher();
     }
 
-    match /siteSettings/{settingId} {
+    match /student_card_records/{studentId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if isTeacher();
     }
 
-    match /admins/{userId} {
-      allow read: if signedIn() && request.auth.uid == userId;
-      allow create, update, delete: if isAdmin();
+    match /card_draw_logs/{logId} {
+      allow read, create, update, delete: if isTeacher();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
