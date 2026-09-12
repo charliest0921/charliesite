@@ -7,7 +7,11 @@ service cloud.firestore {
     }
 
     function isTeacher() {
-      return signedIn() && request.auth.token.email == "a776663@gmail.com";
+      return signedIn() && request.auth.token.email in [
+        "a776663@st.tc.edu.tw",
+        "a776663@gmail.com",
+        "charliest0921@gmail.com"
+      ];
     }
 
     match /card_inventory/{cardId} {

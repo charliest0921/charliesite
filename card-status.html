@@ -448,10 +448,9 @@
       setDoc,
       writeBatch
     } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
-    import { cardFirebaseConfig, hasCardFirebaseConfig } from "./card-firebase-config.js";
+    import { cardFirebaseConfig, cardTeacherEmails, hasCardFirebaseConfig } from "./card-firebase-config.js";
     import { cardSeed0912 } from "./card-seed-0912.js";
 
-    const TEACHER_EMAIL = "a776663@gmail.com";
     const catalog = [
       { id: "1", rarity: "UR" }, { id: "2", rarity: "UR" }, { id: "3", rarity: "UR" },
       { id: "4", rarity: "SSR" }, { id: "5", rarity: "SSR" }, { id: "6", rarity: "SSR" },
@@ -481,9 +480,12 @@
     let students = new Map();
     let teacher = false;
     let highlighted = false;
+    let seedAttempted = false;
+    let studentSnapshotLoaded = false;
 
     function isTeacher(user) {
-      return (user?.email || "").toLowerCase() === TEACHER_EMAIL;
+      const email = String(user?.email || "").toLowerCase();
+      return cardTeacherEmails.map((item) => item.toLowerCase()).includes(email);
     }
 
     function setStatus(message) {
@@ -492,7 +494,7 @@
 
     function mergedCards() {
       const totals = aggregateStudentCounts();
-      if (students.size > 0) {
+      if (students.size > 0 || cardSeed0912.length > 0) {
         return catalog.map((card) => ({ ...card, count: totals[card.id] || 0 }));
       }
       return catalog.map((card) => ({ ...card, count: 0, ...(cards.get(card.id) || {}) }));
@@ -500,11 +502,12 @@
 
     function upgradeReady(card) {
       if (!upgradeMap.has(card.id)) return false;
-      if (students.size === 0) return Number(card.count || 0) >= 3;
-      return Array.from(students.values()).some((student) => Number(student.cards?.[card.id] || 0) >= 3);
+      const source = students.size > 0 ? Array.from(students.values()) : cardSeed0912;
+      if (source.length === 0) return Number(card.count || 0) >= 3;
+      return source.some((student) => Number(student.cards?.[card.id] || 0) >= 3);
     }
 
-    function aggregateStudentCounts(source = Array.from(students.values())) {
+    function aggregateStudentCounts(source = (students.size > 0 ? Array.from(students.values()) : cardSeed0912)) {
       const totals = Object.fromEntries(catalog.map((card) => [card.id, 0]));
       source.forEach((student) => {
         catalog.forEach((card) => {
@@ -515,7 +518,8 @@
     }
 
     function sortedStudents() {
-      return Array.from(students.values()).sort((a, b) => Number(a.studentNo) - Number(b.studentNo));
+      const source = students.size > 0 ? Array.from(students.values()) : cardSeed0912;
+      return source.sort((a, b) => Number(a.studentNo) - Number(b.studentNo));
     }
 
     function renderStudentTable() {
@@ -669,12 +673,27 @@
 
     async function seedCatalog() {
       if (!confirm("確認把 0912 備份的 27 位學生卡片紀錄匯入 Firebase？同學生編號會被這份備份覆蓋。")) return;
+      await writeSeedCatalog();
+    }
+
+    async function writeSeedCatalog() {
       const batch = writeBatch(db);
       cardSeed0912.forEach((student) => saveStudentRecord(student, batch));
       await batch.commit();
       students = new Map(cardSeed0912.map((student) => [String(student.studentNo), student]));
       await syncAggregateInventory(cardSeed0912);
       setStatus("0912 備份已匯入 Firebase，並已重算全班卡片總數。");
+    }
+
+    async function autoSeedIfNeeded() {
+      if (!teacher || !studentSnapshotLoaded || seedAttempted || students.size > 0) return;
+      seedAttempted = true;
+      try {
+        await writeSeedCatalog();
+      } catch (error) {
+        console.error(error);
+        setStatus("自動匯入0912備份失敗，請確認 card-firestore.rules 已發布，且教師信箱已加入規則。");
+      }
     }
 
     async function runUpgrade() {
@@ -870,8 +889,9 @@
       upgradeButton.classList.toggle("hidden", !teacher);
       seedButton.classList.toggle("hidden", !teacher);
       if (user && !teacher) {
-        setStatus("這個帳號不是教師 Gmail，已登出；學生可直接查看卡片狀態。");
-        signOut(auth);
+        setStatus(`已登入 ${user.email || "未知帳號"}，但這個信箱不在教師名單。學生仍可查看卡片狀態；若這是教師信箱，請加入 card-firebase-config.js 的 cardTeacherEmails，並同步更新 card-firestore.rules。`);
+      } else if (teacher) {
+        autoSeedIfNeeded();
       }
       renderCards();
     }
@@ -901,8 +921,10 @@
         setStatus("卡片資料讀取失敗，請確認 Firestore Rules 已更新。");
       });
       onSnapshot(collection(db, "student_card_records"), (snap) => {
+        studentSnapshotLoaded = true;
         students = new Map(snap.docs.map((item) => [item.id, item.data()]));
         renderCards();
+        autoSeedIfNeeded();
       }, (error) => {
         console.error(error);
         setStatus("學生卡片資料讀取失敗，請確認 Firestore Rules 已更新。");

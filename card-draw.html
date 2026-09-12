@@ -560,9 +560,8 @@
       setDoc,
       writeBatch
     } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
-    import { cardFirebaseConfig, hasCardFirebaseConfig } from "./card-firebase-config.js";
+    import { cardFirebaseConfig, cardTeacherEmails, hasCardFirebaseConfig } from "./card-firebase-config.js";
 
-    const TEACHER_EMAIL = "a776663@gmail.com";
     const catalog = [
       { id: "1", rarity: "UR", weight: 0.25 }, { id: "2", rarity: "UR", weight: 0.25 }, { id: "3", rarity: "UR", weight: 0.25 },
       { id: "4", rarity: "SSR", weight: 1 }, { id: "5", rarity: "SSR", weight: 1 }, { id: "6", rarity: "SSR", weight: 1 },
@@ -597,7 +596,8 @@
     let currentStudentNo = "";
 
     function isTeacher(user) {
-      return (user?.email || "").toLowerCase() === TEACHER_EMAIL;
+      const email = String(user?.email || "").toLowerCase();
+      return cardTeacherEmails.map((item) => item.toLowerCase()).includes(email);
     }
 
     function setStatus(message) {
@@ -806,8 +806,7 @@
       if (!user) {
         setStatus("等待教師登入。");
       } else if (!allowed) {
-        setStatus("這個帳號不是教師 Gmail，抽卡區不開放使用。");
-        signOut(auth);
+        setStatus(`已登入 ${user.email || "未知帳號"}，但這個信箱不在教師名單。請到 card-firebase-config.js 的 cardTeacherEmails 加入這個信箱。`);
       } else {
         setStatus("教師登入成功。請先輸入學生編號，再開始抽卡。");
       }

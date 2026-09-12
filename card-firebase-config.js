@@ -10,6 +10,12 @@ export const cardFirebaseConfig = {
   measurementId: "G-4BB2M3KGTF"
 };
 
+export const cardTeacherEmails = [
+  "a776663@st.tc.edu.tw",
+  "a776663@gmail.com",
+  "charliest0921@gmail.com"
+];
+
 export function hasCardFirebaseConfig() {
   return !cardFirebaseConfig.apiKey.includes("PASTE_")
     && !cardFirebaseConfig.projectId.includes("PASTE_");
