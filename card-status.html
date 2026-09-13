@@ -303,14 +303,15 @@
 
     .student-table {
       width: 100%;
-      min-width: 920px;
-      border-collapse: collapse;
-      font-size: 0.92rem;
+      min-width: 1120px;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.98rem;
     }
 
     .student-table th,
     .student-table td {
-      padding: 9px 8px;
+      padding: 8px 7px;
       border-bottom: 1px solid rgba(232, 238, 255, 0.1);
       text-align: center;
       white-space: nowrap;
@@ -332,18 +333,29 @@
       z-index: 2;
       background: rgba(8, 11, 19, 0.96);
       font-weight: 950;
+      font-size: 1.12rem;
     }
 
     .student-table input {
-      width: 58px;
-      min-height: 34px;
-      padding: 5px;
+      width: 74px;
+      min-height: 46px;
+      padding: 5px 7px;
       text-align: center;
       border: 1px solid rgba(232, 238, 255, 0.16);
       border-radius: 6px;
-      background: rgba(2, 6, 23, 0.56);
+      background: rgba(2, 6, 23, 0.72);
       color: var(--ink);
-      font-weight: 900;
+      font-size: 1.35rem;
+      font-weight: 950;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 14px rgba(0, 0, 0, 0.16);
+    }
+
+    .student-table input:disabled {
+      opacity: 1;
+      cursor: default;
+      -webkit-text-fill-color: currentColor;
     }
 
     .student-table th.card-r,
@@ -381,14 +393,14 @@
     .student-table td.card-sr input,
     .student-table td.card-ssr input {
       color: #07111f;
-      background: rgba(255, 255, 255, 0.42);
+      background: rgba(255, 255, 255, 0.68);
       border-color: rgba(3, 7, 18, 0.2);
     }
 
     .student-table td.card-r input,
     .student-table td.card-ur input,
     .student-table td.extra-x input {
-      background: rgba(3, 7, 18, 0.48);
+      background: rgba(3, 7, 18, 0.68);
     }
 
     .upgrade-cell {
