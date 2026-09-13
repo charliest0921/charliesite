@@ -409,6 +409,131 @@
       font-weight: 950;
     }
 
+    .upgrade-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background:
+        radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.2), transparent 16rem),
+        radial-gradient(circle at 30% 30%, rgba(0, 245, 212, 0.28), transparent 28rem),
+        radial-gradient(circle at 70% 28%, rgba(255, 176, 0, 0.28), transparent 28rem),
+        rgba(2, 5, 14, 0.86);
+      backdrop-filter: blur(18px) saturate(160%);
+    }
+
+    .upgrade-overlay.hidden { display: none; }
+
+    .upgrade-modal {
+      width: min(840px, 100%);
+      padding: clamp(18px, 3vw, 28px);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.055)),
+        rgba(8, 11, 19, 0.88);
+      box-shadow: 0 0 90px rgba(0, 245, 212, 0.22), 0 30px 110px rgba(0, 0, 0, 0.56);
+      overflow: hidden;
+    }
+
+    .upgrade-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .upgrade-title h2 {
+      margin: 0;
+      font-size: clamp(1.45rem, 4vw, 2.45rem);
+    }
+
+    .upgrade-title span {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .upgrade-stage {
+      display: grid;
+      grid-template-columns: 1fr auto 0.82fr;
+      align-items: center;
+      gap: clamp(14px, 3vw, 28px);
+      min-height: 360px;
+    }
+
+    .upgrade-materials {
+      position: relative;
+      height: 320px;
+    }
+
+    .upgrade-card {
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+    }
+
+    .upgrade-card img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .upgrade-materials .upgrade-card {
+      position: absolute;
+      width: 150px;
+      height: 210px;
+      top: 54px;
+      left: 50%;
+      transform-origin: 50% 80%;
+    }
+
+    .upgrade-materials .upgrade-card:nth-child(1) { transform: translateX(-166px) rotate(-12deg); }
+    .upgrade-materials .upgrade-card:nth-child(2) { z-index: 2; transform: translateX(-75px) translateY(-18px); }
+    .upgrade-materials .upgrade-card:nth-child(3) { transform: translateX(16px) rotate(12deg); }
+
+    .upgrade-result {
+      width: min(220px, 28vw);
+      min-width: 168px;
+      aspect-ratio: 5 / 7;
+      opacity: 0;
+      transform: translateX(24px) scale(0.72);
+    }
+
+    .upgrade-arrow {
+      display: grid;
+      place-items: center;
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff7bb;
+      font-size: 2.8rem;
+      font-weight: 950;
+      text-shadow: 0 0 22px rgba(255, 176, 0, 0.76);
+      box-shadow: 0 0 48px rgba(255, 176, 0, 0.18);
+    }
+
+    .upgrade-caption {
+      min-height: 34px;
+      margin: 12px 0 0;
+      color: #eaf2ff;
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .upgrade-overlay.playing .upgrade-materials .upgrade-card:nth-child(1) { animation: mergeLeft 1.45s ease-in-out both; }
+    .upgrade-overlay.playing .upgrade-materials .upgrade-card:nth-child(2) { animation: mergeCenter 1.45s ease-in-out both; }
+    .upgrade-overlay.playing .upgrade-materials .upgrade-card:nth-child(3) { animation: mergeRight 1.45s ease-in-out both; }
+    .upgrade-overlay.playing .upgrade-arrow { animation: fusionPulse 1.45s ease-in-out both; }
+    .upgrade-overlay.playing .upgrade-result { animation: resultAppear 1.45s ease-in-out both; }
+
     @keyframes readyGlow {
       from { box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 24px rgba(184, 255, 51, 0.2); }
       to { box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 0 52px rgba(184, 255, 51, 0.42); }
@@ -425,6 +550,36 @@
       to { background: rgba(184, 255, 51, 0.28); box-shadow: inset 0 0 24px rgba(184, 255, 51, 0.22); }
     }
 
+    @keyframes mergeLeft {
+      0% { transform: translateX(-166px) rotate(-12deg); opacity: 1; filter: brightness(1); }
+      58% { transform: translateX(-74px) rotate(-4deg) scale(0.86); opacity: 1; filter: brightness(1.8); }
+      100% { transform: translateX(-26px) scale(0.12); opacity: 0; filter: blur(10px) brightness(2.2); }
+    }
+
+    @keyframes mergeCenter {
+      0% { transform: translateX(-75px) translateY(-18px); opacity: 1; filter: brightness(1); }
+      58% { transform: translateX(-74px) translateY(-2px) scale(0.9); opacity: 1; filter: brightness(1.8); }
+      100% { transform: translateX(-26px) scale(0.12); opacity: 0; filter: blur(10px) brightness(2.2); }
+    }
+
+    @keyframes mergeRight {
+      0% { transform: translateX(16px) rotate(12deg); opacity: 1; filter: brightness(1); }
+      58% { transform: translateX(-74px) rotate(4deg) scale(0.86); opacity: 1; filter: brightness(1.8); }
+      100% { transform: translateX(-26px) scale(0.12); opacity: 0; filter: blur(10px) brightness(2.2); }
+    }
+
+    @keyframes fusionPulse {
+      0%, 35% { transform: scale(0.9); opacity: 0.55; }
+      62% { transform: scale(1.35); opacity: 1; box-shadow: 0 0 96px rgba(255, 245, 158, 0.68); }
+      100% { transform: scale(1); opacity: 0.95; }
+    }
+
+    @keyframes resultAppear {
+      0%, 55% { opacity: 0; transform: translateX(24px) scale(0.72); filter: blur(12px) brightness(1.8); }
+      76% { opacity: 1; transform: translateX(0) scale(1.12); filter: blur(0) brightness(1.35); box-shadow: 0 0 92px rgba(255, 245, 158, 0.58); }
+      100% { opacity: 1; transform: translateX(0) scale(1); filter: blur(0) brightness(1); }
+    }
+
     @keyframes urBreath {
       from { filter: brightness(1); box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.16), 0 0 0 rgba(0, 245, 212, 0); }
       to { filter: brightness(1.35) saturate(1.25); box-shadow: inset 0 0 28px rgba(255, 255, 255, 0.32), 0 0 18px rgba(0, 245, 212, 0.3); }
@@ -438,6 +593,26 @@
       .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .toolbar { grid-template-columns: 1fr; }
       .actions .button { flex: 1 1 150px; }
+      .upgrade-stage {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .upgrade-materials {
+        height: 240px;
+      }
+      .upgrade-materials .upgrade-card {
+        width: 116px;
+        height: 162px;
+        top: 42px;
+      }
+      .upgrade-result {
+        width: 168px;
+        justify-self: center;
+      }
+      .upgrade-arrow {
+        justify-self: center;
+        transform: rotate(90deg);
+      }
     }
 
     @media (max-width: 540px) {
@@ -496,6 +671,25 @@
     </section>
   </main>
 
+  <div class="upgrade-overlay hidden" id="upgradeOverlay" aria-live="polite">
+    <div class="upgrade-modal">
+      <div class="upgrade-title">
+        <h2>三合一升級中</h2>
+        <span id="upgradeProgress">1 / 1</span>
+      </div>
+      <div class="upgrade-stage">
+        <div class="upgrade-materials">
+          <div class="upgrade-card"><img id="upgradeSourceA" alt="升級素材卡 1" /></div>
+          <div class="upgrade-card"><img id="upgradeSourceB" alt="升級素材卡 2" /></div>
+          <div class="upgrade-card"><img id="upgradeSourceC" alt="升級素材卡 3" /></div>
+        </div>
+        <div class="upgrade-arrow">→</div>
+        <div class="upgrade-card upgrade-result"><img id="upgradeTarget" alt="升級後卡片" /></div>
+      </div>
+      <p class="upgrade-caption" id="upgradeCaption">準備升級。</p>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
     import {
@@ -526,6 +720,7 @@
       { id: "7", rarity: "SR" }, { id: "8", rarity: "SR" }, { id: "9", rarity: "SR" },
       { id: "10", rarity: "R" }, { id: "11", rarity: "R" }, { id: "12", rarity: "R" }
     ].map((card) => ({ ...card, name: `${card.id}${card.rarity}`, image: `./class-console-files/cards/${card.id}.jpg` }));
+    const catalogById = new Map(catalog.map((card) => [card.id, card]));
     const upgradeMap = new Map([
       ["12", "9"], ["11", "8"], ["10", "7"],
       ["9", "6"], ["8", "5"], ["7", "4"],
@@ -547,6 +742,11 @@
     const clearAllButton = $("clearAllButton");
     const seedButton = $("seedButton");
     const csvInput = $("csvInput");
+    const upgradeOverlay = $("upgradeOverlay");
+    const upgradeProgress = $("upgradeProgress");
+    const upgradeCaption = $("upgradeCaption");
+    const upgradeSourceImgs = [$("upgradeSourceA"), $("upgradeSourceB"), $("upgradeSourceC")];
+    const upgradeTargetImg = $("upgradeTarget");
     let db;
     let auth;
     let cards = new Map();
@@ -755,6 +955,41 @@
       renderCards();
     }
 
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function playUpgradeAnimation(item, index, total) {
+      const source = catalogById.get(String(item.cardId));
+      const target = catalogById.get(String(item.targetId));
+      if (!source || !target) return;
+
+      upgradeProgress.textContent = `${index + 1} / ${total}`;
+      upgradeCaption.textContent = `${item.studentNo} 號學生：3 張 ${source.name} 合成 1 張 ${target.name}`;
+      upgradeSourceImgs.forEach((img) => {
+        img.src = source.image;
+        img.alt = source.name;
+      });
+      upgradeTargetImg.src = target.image;
+      upgradeTargetImg.alt = target.name;
+
+      upgradeOverlay.classList.remove("hidden", "playing");
+      void upgradeOverlay.offsetWidth;
+      upgradeOverlay.classList.add("playing");
+      await sleep(1650);
+      upgradeOverlay.classList.remove("playing");
+      await sleep(180);
+    }
+
+    async function playUpgradeSequence(items) {
+      if (!items.length) return;
+      upgradeOverlay.classList.remove("hidden");
+      for (let index = 0; index < items.length; index += 1) {
+        await playUpgradeAnimation(items[index], index, items.length);
+      }
+      upgradeOverlay.classList.add("hidden");
+    }
+
     async function runUpgrade() {
       const readyStudents = [];
       sortedStudents().forEach((student) => {
@@ -771,30 +1006,45 @@
       const lines = readyStudents.map((item) => `${item.studentNo} 號學生：${item.cardId} 號卡 -3，${item.targetId} 號卡 +1`).join("\n");
       if (!confirm(`確認升級以下卡片？\n\n${lines}`)) return;
 
-      const batch = writeBatch(db);
-      const updatedStudents = new Map(students);
-      for (const item of readyStudents) {
-        const student = updatedStudents.get(String(item.studentNo));
-        const studentCards = { ...(student.cards || {}) };
-        studentCards[item.cardId] = Number(studentCards[item.cardId] || 0) - 3;
-        studentCards[item.targetId] = Number(studentCards[item.targetId] || 0) + 1;
-        updatedStudents.set(String(item.studentNo), { ...student, cards: studentCards });
-      }
-      updatedStudents.forEach((student) => saveStudentRecord(student, batch));
-      students = updatedStudents;
-      const totals = aggregateStudentCounts(Array.from(updatedStudents.values()));
-      catalog.forEach((card) => {
-        batch.set(doc(db, "card_inventory", card.id), {
-          ...card,
-          count: Number(totals[card.id] || 0),
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-      });
+      upgradeButton.disabled = true;
+      upgradeHintButton.disabled = true;
+      try {
+        setStatus("正在播放三合一升級動畫...");
+        await playUpgradeSequence(readyStudents);
+        setStatus("升級資料寫入 Firebase...");
 
-      await batch.commit();
-      highlighted = false;
-      renderCards();
-      setStatus("升級完成：每個學生自己的發光卡格各扣 3 張，並增加 1 張上一階卡。");
+        const batch = writeBatch(db);
+        const updatedStudents = new Map(students);
+        for (const item of readyStudents) {
+          const student = updatedStudents.get(String(item.studentNo));
+          const studentCards = { ...(student.cards || {}) };
+          studentCards[item.cardId] = Number(studentCards[item.cardId] || 0) - 3;
+          studentCards[item.targetId] = Number(studentCards[item.targetId] || 0) + 1;
+          updatedStudents.set(String(item.studentNo), { ...student, cards: studentCards });
+        }
+        updatedStudents.forEach((student) => saveStudentRecord(student, batch));
+        const totals = aggregateStudentCounts(Array.from(updatedStudents.values()));
+        catalog.forEach((card) => {
+          batch.set(doc(db, "card_inventory", card.id), {
+            ...card,
+            count: Number(totals[card.id] || 0),
+            updatedAt: serverTimestamp()
+          }, { merge: true });
+        });
+
+        await batch.commit();
+        students = updatedStudents;
+        highlighted = false;
+        renderCards();
+        setStatus("升級完成：每個學生自己的發光卡格各扣 3 張，並增加 1 張上一階卡。");
+      } catch (error) {
+        console.error(error);
+        upgradeOverlay.classList.add("hidden");
+        renderCards();
+        setStatus(`升級失敗：${error.message || "請稍後再試。"}`);
+      } finally {
+        upgradeHintButton.disabled = false;
+      }
     }
 
     function parseCsv(text) {
