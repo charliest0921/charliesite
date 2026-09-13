@@ -1110,7 +1110,7 @@
 
     function waitForUpgradeConfirm(isLast) {
       return new Promise((resolve) => {
-        upgradeConfirmButton.textContent = isLast ? "完成升級" : "確定，下一張";
+        upgradeConfirmButton.textContent = isLast ? "完成升級" : "繼續下一張";
         upgradeConfirmButton.classList.remove("hidden");
         upgradeConfirmButton.focus();
         upgradeConfirmButton.onclick = () => {
@@ -1144,9 +1144,9 @@
       void upgradeOverlay.offsetWidth;
       upgradeOverlay.classList.add("playing");
       await sleep(duration);
-      upgradeOverlay.classList.remove("playing");
       upgradeCaption.textContent = `${item.studentNo} 號學生升級完成：${source.name} ×3 → ${target.name}`;
       await waitForUpgradeConfirm(index === total - 1);
+      upgradeOverlay.classList.remove("playing");
     }
 
     async function playUpgradeSequence(items) {
