@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>間隔和植樹問題 | Charlie 的班級網站</title>
+  <style>
+    :root {
+      --bg: #05070d;
+      --ink: #f3f7ff;
+      --muted: #a9b4c7;
+      --line: rgba(232, 238, 255, 0.16);
+      --panel: rgba(13, 18, 31, 0.64);
+      --blue: #35a7ff;
+      --cyan: #00f5d4;
+      --green: #b8ff33;
+      --amber: #ffb000;
+      --rose: #ff2e88;
+      --violet: #a855f7;
+      --radius: 8px;
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 0%, rgba(0, 245, 212, 0.2), transparent 24rem),
+        radial-gradient(circle at 88% 6%, rgba(255, 46, 136, 0.18), transparent 26rem),
+        radial-gradient(circle at 48% 100%, rgba(255, 176, 0, 0.12), transparent 30rem),
+        linear-gradient(135deg, #03040a 0%, #080b12 44%, #10131c 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 80%);
+      pointer-events: none;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    button { border: 0; cursor: pointer; }
+
+    .page {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 26px 0 44px;
+    }
+
+    .topbar, .hero, .panel, .stat {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04)),
+        var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 24px 70px rgba(0,0,0,0.42);
+      backdrop-filter: blur(24px) saturate(165%);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--green), var(--cyan) 54%, var(--blue));
+      color: #02040a;
+      font-weight: 950;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.18rem, 2.6vw, 1.7rem);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+    }
+
+    .home {
+      min-height: 42px;
+      padding: 10px 13px;
+      border: 1px solid rgba(232,238,255,0.18);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.08);
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .hero {
+      padding: clamp(22px, 4vw, 38px);
+      margin-bottom: 16px;
+    }
+
+    .eyebrow {
+      color: var(--cyan);
+      font-weight: 900;
+      text-shadow: 0 0 18px rgba(0,245,212,0.42);
+    }
+
+    .hero h2 {
+      max-width: 900px;
+      margin: 10px 0 12px;
+      font-size: clamp(2rem, 5vw, 4.15rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 860px;
+      margin: 0;
+      color: #bcc7d9;
+      line-height: 1.75;
+      font-size: 1.08rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel { padding: 18px; }
+    .panel h3 { margin: 0 0 12px; font-size: 1.28rem; color: white; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.8fr) minmax(220px, 0.7fr) minmax(360px, 1.2fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .control-label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      color: #dce7f8;
+      font-weight: 900;
+    }
+
+    .control-label output {
+      color: var(--green);
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--cyan);
+    }
+
+    .segmented {
+      display: grid;
+      gap: 8px;
+    }
+
+    .segmented.columns {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .choice {
+      position: relative;
+      display: flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 8px;
+      border: 1px solid rgba(232,238,255,0.15);
+      border-radius: 6px;
+      background: rgba(3, 4, 10, 0.45);
+      color: #dbe7f8;
+      font-weight: 850;
+      text-align: center;
+    }
+
+    .choice input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice:has(input:checked) {
+      border-color: rgba(0,245,212,0.55);
+      background: rgba(0,245,212,0.14);
+      color: white;
+      box-shadow: 0 0 22px rgba(0,245,212,0.12);
+    }
+
+    .choice:has(input:disabled) {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .note {
+      color: #aebbd0;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      min-height: 92px;
+      padding: 13px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 5px;
+      color: white;
+      font-size: clamp(1.65rem, 4vw, 2.5rem);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat small {
+      display: block;
+      margin-top: 7px;
+      color: #b7c4d7;
+      line-height: 1.35;
+    }
+
+    .visual-shell {
+      display: grid;
+      gap: 14px;
+    }
+
+    .road-stage {
+      position: relative;
+      overflow: hidden;
+      min-height: 270px;
+      border: 1px solid rgba(232,238,255,0.13);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+        rgba(3, 4, 10, 0.34);
+    }
+
+    .road-stage svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 270px;
+    }
+
+    .road-stage.closed,
+    .road-stage.closed svg {
+      min-height: 440px;
+    }
+
+    .road-line {
+      stroke: rgba(232,238,255,0.28);
+      stroke-width: 8;
+      stroke-linecap: round;
+      fill: none;
+    }
+
+    .interval {
+      stroke: var(--amber);
+      stroke-width: 10;
+      stroke-linecap: round;
+      fill: none;
+    }
+
+    .interval.alt { stroke: var(--blue); }
+
+    .endpoint {
+      fill: rgba(255,255,255,0.1);
+      stroke: rgba(232,238,255,0.34);
+      stroke-width: 2;
+      stroke-dasharray: 4 5;
+    }
+
+    .tree-ring {
+      fill: rgba(184,255,51,0.2);
+      stroke: var(--green);
+      stroke-width: 3;
+    }
+
+    .tree-core {
+      fill: rgba(184,255,51,0.34);
+      stroke: rgba(184,255,51,0.9);
+      stroke-width: 2;
+    }
+
+    .tree-number {
+      fill: white;
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .interval-tag {
+      fill: rgba(255,176,0,0.22);
+      stroke: rgba(255,176,0,0.8);
+      stroke-width: 1.5;
+    }
+
+    .svg-label {
+      fill: #ecf6ff;
+      font-family: "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      text-anchor: middle;
+    }
+
+    .svg-label.muted {
+      fill: #aebbd0;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .svg-label.strong {
+      fill: white;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .formula {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border: 1px solid rgba(232,238,255,0.13);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.055);
+    }
+
+    .formula b {
+      color: white;
+      font-size: 1.08rem;
+    }
+
+    .formula span {
+      color: #b9c7d9;
+      line-height: 1.6;
+    }
+
+    .groups {
+      display: grid;
+      gap: 12px;
+    }
+
+    .group-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #dce7f8;
+      font-weight: 900;
+    }
+
+    .group-title span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .tokens {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pair {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px;
+      border: 2px solid rgba(0,245,212,0.46);
+      border-radius: 999px;
+      background: rgba(0,245,212,0.08);
+    }
+
+    .pair.warning {
+      border-color: rgba(255,176,0,0.62);
+      background: rgba(255,176,0,0.1);
+    }
+
+    .token {
+      display: inline-grid;
+      min-width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: 999px;
+      font-weight: 950;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .token.tree {
+      background: rgba(184,255,51,0.16);
+      border: 1px solid rgba(184,255,51,0.6);
+      color: white;
+    }
+
+    .token.gap {
+      min-width: 48px;
+      border-radius: 6px;
+      background: rgba(255,176,0,0.14);
+      border: 1px solid rgba(255,176,0,0.56);
+      color: #fff3d4;
+    }
+
+    .token.extra {
+      box-shadow: 0 0 0 3px rgba(255,46,136,0.38);
+      border-color: var(--rose);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: #afbdd0;
+      line-height: 1.4;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: var(--green);
+    }
+
+    .dash {
+      width: 22px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--amber);
+    }
+
+    .ring {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--cyan);
+      border-radius: 999px;
+    }
+
+    @media (max-width: 920px) {
+      .controls { grid-template-columns: 1fr; }
+      .road-stage.closed, .road-stage.closed svg { min-height: 420px; }
+    }
+
+    @media (max-width: 660px) {
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .home { text-align: center; }
+      .hero h2 { font-size: clamp(1.8rem, 11vw, 3.2rem); }
+      .segmented.columns, .stats { grid-template-columns: 1fr; }
+      .road-stage, .road-stage svg { min-height: 250px; }
+      .road-stage.closed, .road-stage.closed svg { min-height: 400px; }
+      .token { min-width: 34px; height: 34px; }
+      .token.gap { min-width: 42px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <a class="brand" href="./index.html">
+        <span class="mark">間</span>
+        <span><h1>間隔和植樹問題</h1><p>Tree and interval explorer</p></span>
+      </a>
+      <a class="home" href="./course-apps.html">回課程應用</a>
+    </header>
+
+    <section class="hero">
+      <span class="eyebrow">Math Explorer</span>
+      <h2>把樹和間隔配成一組，規律就看得見。</h2>
+      <p>調整樹的棵數、頭尾是否種樹，或切換成封閉道路，讓學生觀察「樹多一個」「一樣多」「間隔多一個」分別在什麼情況出現。</p>
+    </section>
+
+    <section class="layout" aria-label="互動植樹問題">
+      <aside class="panel">
+        <h3>選擇條件</h3>
+        <div class="controls">
+          <div>
+            <label class="control-label" for="treeCount">幾棵樹 <output id="treeCountOutput">6 棵</output></label>
+            <input id="treeCount" type="range" min="2" max="25" value="6" />
+          </div>
+
+          <div>
+            <div class="control-label">道路形狀</div>
+            <div class="segmented">
+              <label class="choice">
+                <input type="radio" name="roadType" value="open" checked />
+                直線道路
+              </label>
+              <label class="choice">
+                <input type="radio" name="roadType" value="closed" />
+                封閉圖形道路
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <div class="control-label">頭尾有無樹</div>
+            <div class="segmented columns" id="endpointChoices">
+              <label class="choice">
+                <input type="radio" name="endpointMode" value="both" checked />
+                頭尾都有
+              </label>
+              <label class="choice">
+                <input type="radio" name="endpointMode" value="one" />
+                只有一端
+              </label>
+              <label class="choice">
+                <input type="radio" name="endpointMode" value="none" />
+                頭尾都沒有
+              </label>
+            </div>
+          </div>
+
+          <p class="note" id="modeNote">直線道路會受頭尾是否種樹影響；封閉道路沒有頭尾，所以樹和間隔會一樣多。</p>
+        </div>
+
+        <div class="stats" aria-live="polite">
+          <div class="stat">
+            <span>樹</span>
+            <strong id="treeStat">6</strong>
+            <small>被綠色圓圈標出</small>
+          </div>
+          <div class="stat">
+            <span>間隔</span>
+            <strong id="intervalStat">5</strong>
+            <small>用黃色道路段表示</small>
+          </div>
+          <div class="stat">
+            <span>關係</span>
+            <strong id="relationStat">樹+1</strong>
+            <small id="relationSmall">樹比間隔多 1</small>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel visual-shell">
+        <h3>觀察圖</h3>
+        <div class="road-stage" aria-label="樹與間隔道路圖">
+          <svg id="roadSvg" viewBox="0 0 1600 260" role="img" aria-labelledby="svgTitle svgDesc">
+            <title id="svgTitle">樹與間隔的視覺化</title>
+            <desc id="svgDesc">依照目前條件顯示樹與間隔的數量關係。</desc>
+          </svg>
+        </div>
+
+        <div class="legend" aria-hidden="true">
+          <span><i class="dot"></i> 樹</span>
+          <span><i class="dash"></i> 間隔</span>
+          <span><i class="ring"></i> 一棵樹配一個間隔</span>
+        </div>
+
+        <div class="formula" aria-live="polite">
+          <b id="formulaTitle">頭尾都有樹：樹 = 間隔 + 1</b>
+          <span id="formulaText">把每一棵樹和右邊一段間隔配在一起，最後會剩下一棵樹，所以樹比間隔多 1。</span>
+        </div>
+
+        <div class="groups">
+          <div class="group-title">分組觀察 <span id="groupHint">圈起來的是「1 棵樹 + 1 個間隔」</span></div>
+          <div class="tokens" id="groupTokens" aria-live="polite"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const treeCount = document.getElementById("treeCount");
+    const treeCountOutput = document.getElementById("treeCountOutput");
+    const roadSvg = document.getElementById("roadSvg");
+    const treeStat = document.getElementById("treeStat");
+    const intervalStat = document.getElementById("intervalStat");
+    const relationStat = document.getElementById("relationStat");
+    const relationSmall = document.getElementById("relationSmall");
+    const formulaTitle = document.getElementById("formulaTitle");
+    const formulaText = document.getElementById("formulaText");
+    const groupTokens = document.getElementById("groupTokens");
+    const groupHint = document.getElementById("groupHint");
+    const modeNote = document.getElementById("modeNote");
+    const endpointInputs = [...document.querySelectorAll("input[name='endpointMode']")];
+    const roadInputs = [...document.querySelectorAll("input[name='roadType']")];
+
+    const svgNS = "http://www.w3.org/2000/svg";
+
+    function currentValue(name) {
+      return document.querySelector(`input[name="${name}"]:checked`).value;
+    }
+
+    function getModel() {
+      const trees = Number(treeCount.value);
+      const roadType = currentValue("roadType");
+      const endpointMode = currentValue("endpointMode");
+      let intervals;
+      let relation;
+      let title;
+      let text;
+
+      if (roadType === "closed") {
+        intervals = trees;
+        relation = "一樣多";
+        title = "封閉道路：樹 = 間隔";
+        text = "封閉圖形沒有頭尾，每一棵樹都能配到下一段間隔，繞一圈剛好全部配完。";
+      } else if (endpointMode === "both") {
+        intervals = trees - 1;
+        relation = "樹+1";
+        title = "頭尾都有樹：樹 = 間隔 + 1";
+        text = "把每一棵樹和右邊一段間隔配在一起，最後會剩下一棵樹，所以樹比間隔多 1。";
+      } else if (endpointMode === "one") {
+        intervals = trees;
+        relation = "一樣多";
+        title = "只有一端有樹：樹 = 間隔";
+        text = "從有樹的那一端開始配，每一棵樹都能配到一段間隔，剛好一樣多。";
+      } else {
+        intervals = trees + 1;
+        relation = "間隔+1";
+        title = "頭尾都沒有樹：間隔 = 樹 + 1";
+        text = "兩端都不種樹時，先多出開頭一段間隔，再把樹和後面的間隔配對，所以間隔比樹多 1。";
+      }
+
+      return { trees, roadType, endpointMode, intervals, relation, title, text };
+    }
+
+    function makeSvg(tag, attrs = {}) {
+      const el = document.createElementNS(svgNS, tag);
+      Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+      return el;
+    }
+
+    function splitLabel(label) {
+      const match = label.match(/^(\D+)(\d+)$/);
+      return match ? [match[1], match[2]] : [label, ""];
+    }
+
+    function drawTree(x, y, label, showWord = true) {
+      const [word, number] = splitLabel(label);
+      const g = makeSvg("g", { transform: `translate(${x} ${y})` });
+      if (showWord) {
+        const labelText = makeSvg("text", { class: "svg-label strong", x: 0, y: -24 });
+        labelText.textContent = word;
+        g.appendChild(labelText);
+      }
+      g.appendChild(makeSvg("circle", { class: "tree-ring", cx: 0, cy: 0, r: 21 }));
+      g.appendChild(makeSvg("circle", { class: "tree-core", cx: 0, cy: 0, r: 14 }));
+      const numberText = makeSvg("text", { class: "tree-number", x: 0, y: 1 });
+      numberText.textContent = number;
+      g.appendChild(numberText);
+      return g;
+    }
+
+    function drawIntervalLabel(x, y, label) {
+      const g = makeSvg("g", { transform: `translate(${x} ${y})` });
+      g.appendChild(makeSvg("rect", { class: "interval-tag", x: -22, y: -12, width: 44, height: 24, rx: 6 }));
+      const text = makeSvg("text", { class: "svg-label", x: 0, y: 5 });
+      text.textContent = label;
+      g.appendChild(text);
+      return g;
+    }
+
+    function drawOpenRoad(model) {
+      const { trees, intervals, endpointMode } = model;
+      const startX = 72;
+      const endX = 1528;
+      const y = 132;
+      const step = (endX - startX) / intervals;
+      const boundaries = Array.from({ length: intervals + 1 }, (_, i) => startX + step * i);
+      let treeIndexes;
+
+      if (endpointMode === "both") {
+        treeIndexes = Array.from({ length: trees }, (_, i) => i);
+      } else if (endpointMode === "one") {
+        treeIndexes = Array.from({ length: trees }, (_, i) => i);
+      } else {
+        treeIndexes = Array.from({ length: trees }, (_, i) => i + 1);
+      }
+
+      const treeKey = makeSvg("text", { class: "svg-label strong", x: 120, y: 32 });
+      treeKey.textContent = "樹：綠色圓點";
+      roadSvg.appendChild(treeKey);
+      const intervalKey = makeSvg("text", { class: "svg-label strong", x: 1450, y: 32 });
+      intervalKey.textContent = "間隔：彩色線段";
+      roadSvg.appendChild(intervalKey);
+
+      roadSvg.appendChild(makeSvg("line", { class: "road-line", x1: startX, y1: y, x2: endX, y2: y }));
+
+      for (let i = 0; i < intervals; i += 1) {
+        roadSvg.appendChild(makeSvg("line", {
+          class: `interval ${i % 2 ? "alt" : ""}`,
+          x1: boundaries[i] + 23,
+          y1: y,
+          x2: boundaries[i + 1] - 23,
+          y2: y
+        }));
+        roadSvg.appendChild(drawIntervalLabel((boundaries[i] + boundaries[i + 1]) / 2, y + 42, `間${i + 1}`));
+      }
+
+      [0, intervals].forEach((boundaryIndex) => {
+        const shouldMarkEndpoint =
+          (endpointMode === "one" && boundaryIndex === intervals) ||
+          (endpointMode === "none" && (boundaryIndex === 0 || boundaryIndex === intervals));
+        if (shouldMarkEndpoint) {
+          const x = boundaries[boundaryIndex];
+          roadSvg.appendChild(makeSvg("circle", { class: "endpoint", cx: x, cy: y, r: 18 }));
+          const endLabel = makeSvg("text", { class: "svg-label muted", x, y: y + 74 });
+          endLabel.textContent = "端點";
+          roadSvg.appendChild(endLabel);
+        }
+      });
+
+      treeIndexes.forEach((idx, i) => {
+        roadSvg.appendChild(drawTree(boundaries[idx], y, `樹${i + 1}`));
+      });
+    }
+
+    function polar(cx, cy, r, angle) {
+      return {
+        x: cx + Math.cos(angle) * r,
+        y: cy + Math.sin(angle) * r
+      };
+    }
+
+    function describeArc(cx, cy, r, startAngle, endAngle) {
+      const start = polar(cx, cy, r, startAngle);
+      const end = polar(cx, cy, r, endAngle);
+      const largeArc = endAngle - startAngle <= Math.PI ? 0 : 1;
+      return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+    }
+
+    function drawClosedRoad(model) {
+      const { trees } = model;
+      const cx = 380;
+      const cy = 220;
+      const r = 142;
+      const treeKey = makeSvg("text", { class: "svg-label strong", x: 116, y: 60 });
+      treeKey.textContent = "樹：綠色圓點";
+      roadSvg.appendChild(treeKey);
+      const intervalKey = makeSvg("text", { class: "svg-label strong", x: 644, y: 60 });
+      intervalKey.textContent = "間隔：彩色弧段";
+      roadSvg.appendChild(intervalKey);
+      roadSvg.appendChild(makeSvg("circle", { class: "road-line", cx, cy, r }));
+
+      for (let i = 0; i < trees; i += 1) {
+        const start = -Math.PI / 2 + (i / trees) * Math.PI * 2 + 0.08;
+        const end = -Math.PI / 2 + ((i + 1) / trees) * Math.PI * 2 - 0.08;
+        roadSvg.appendChild(makeSvg("path", {
+          class: `interval ${i % 2 ? "alt" : ""}`,
+          d: describeArc(cx, cy, r, start, end)
+        }));
+        const mid = polar(cx, cy, r + 32, (start + end) / 2);
+        roadSvg.appendChild(drawIntervalLabel(mid.x, mid.y, `間${i + 1}`));
+      }
+
+      for (let i = 0; i < trees; i += 1) {
+        const angle = -Math.PI / 2 + (i / trees) * Math.PI * 2;
+        const pos = polar(cx, cy, r, angle);
+        roadSvg.appendChild(drawTree(pos.x, pos.y, `樹${i + 1}`, false));
+      }
+    }
+
+    function buildGroupTokens(model) {
+      groupTokens.innerHTML = "";
+      const { trees, intervals, roadType, endpointMode } = model;
+
+      function addPair(treeLabel, gapLabel, extraClass = "") {
+        const pair = document.createElement("span");
+        pair.className = `pair ${extraClass}`;
+        pair.innerHTML = `<span class="token tree">${treeLabel}</span><span class="token gap">${gapLabel}</span>`;
+        groupTokens.appendChild(pair);
+      }
+
+      function addToken(kind, text, extra = "") {
+        const token = document.createElement("span");
+        token.className = `token ${kind} ${extra}`;
+        token.textContent = text;
+        groupTokens.appendChild(token);
+      }
+
+      if (roadType === "closed") {
+        for (let i = 1; i <= trees; i += 1) addPair(`樹${i}`, `隔${i}`);
+        groupHint.textContent = "封閉道路繞一圈，每一棵樹都配到一個間隔";
+        return;
+      }
+
+      if (endpointMode === "both") {
+        for (let i = 1; i <= intervals; i += 1) addPair(`樹${i}`, `隔${i}`);
+        addToken("tree", `樹${trees}`, "extra");
+        groupHint.textContent = "最後剩下的樹用粉色圈出，表示樹比間隔多 1";
+      } else if (endpointMode === "one") {
+        for (let i = 1; i <= trees; i += 1) addPair(`樹${i}`, `隔${i}`);
+        groupHint.textContent = "每一棵樹剛好配一個間隔";
+      } else {
+        addToken("gap", "隔1", "extra");
+        for (let i = 1; i <= trees; i += 1) addPair(`樹${i}`, `隔${i + 1}`, "warning");
+        groupHint.textContent = "開頭多出一個間隔，所以間隔比樹多 1";
+      }
+    }
+
+    function render() {
+      const model = getModel();
+      const endpointDisabled = model.roadType === "closed";
+      endpointInputs.forEach(input => input.disabled = endpointDisabled);
+
+      treeCountOutput.textContent = `${model.trees} 棵`;
+      treeStat.textContent = model.trees;
+      intervalStat.textContent = model.intervals;
+      relationStat.textContent = model.relation;
+      relationSmall.textContent = model.relation === "樹+1"
+        ? "樹比間隔多 1"
+        : model.relation === "間隔+1"
+          ? "間隔比樹多 1"
+          : "樹和間隔一樣多";
+      formulaTitle.textContent = model.title;
+      formulaText.textContent = model.text;
+      modeNote.textContent = endpointDisabled
+        ? "封閉道路沒有頭尾，所以下方頭尾選項暫時不影響結果。"
+        : "直線道路會受頭尾是否種樹影響；改變頭尾條件會改變間隔數。";
+
+      roadSvg.replaceChildren(
+        makeSvg("title", { id: "svgTitle" }),
+        makeSvg("desc", { id: "svgDesc" })
+      );
+      roadSvg.querySelector("title").textContent = model.title;
+      roadSvg.querySelector("desc").textContent = `${model.trees} 棵樹，${model.intervals} 個間隔，${relationSmall.textContent}。`;
+
+      if (model.roadType === "closed") {
+        roadSvg.setAttribute("viewBox", "0 0 760 440");
+        roadSvg.parentElement.classList.add("closed");
+        drawClosedRoad(model);
+      } else {
+        roadSvg.setAttribute("viewBox", "0 0 1600 260");
+        roadSvg.parentElement.classList.remove("closed");
+        drawOpenRoad(model);
+      }
+      buildGroupTokens(model);
+    }
+
+    treeCount.addEventListener("input", render);
+    endpointInputs.forEach(input => input.addEventListener("change", render));
+    roadInputs.forEach(input => input.addEventListener("change", render));
+    render();
+  </script>
+</body>
+</html>
